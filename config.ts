@@ -7,8 +7,16 @@ export const CAMPUS_SLUG = "up-hatfield";
 export const CAMPUS_NAME = "University of Pretoria - Hatfield";
 
 // TODO: confirm the correct UP student email domain(s) with the project
-// owner before Phase 3 (Auth & verification). Using a placeholder domain
-// so nothing accidentally verifies as a real student until this is set.
+// owner. Using a placeholder domain so nothing accidentally verifies as a
+// real student until this is set.
+//
+// NOT CURRENTLY ENFORCED ANYWHERE. This constant is unused — the
+// handle_new_user trigger (supabase/migrations/0005) marks every signup
+// as verified regardless of email, by explicit instruction, to unblock
+// seller onboarding and reviews while the domain is still unconfirmed.
+// This is the app's core trust mechanism per the brief and must be wired
+// up before real users touch this: once the domain is confirmed, update
+// 0005's trigger to check the new user's email against this list.
 export const ALLOWED_EMAIL_DOMAINS = ["tuks.co.za"];
 
 // Categories live in the DB (see supabase/migrations), but launch scope
