@@ -1,8 +1,10 @@
 // Local development seed data ONLY. Never run this against production.
 // Usage: npm run seed  (requires .env.local with SUPABASE_SERVICE_ROLE_KEY set)
 
-import "dotenv/config";
+import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+
+config({ path: ".env.local" });
 import { CAMPUS_NAME, CAMPUS_SLUG } from "../config";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
