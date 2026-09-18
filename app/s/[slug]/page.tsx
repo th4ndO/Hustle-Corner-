@@ -7,6 +7,8 @@ import { WHATSAPP_PREFILL_MESSAGE } from "@/config";
 import ReviewForm from "@/components/ReviewForm";
 import OwnReview from "@/components/OwnReview";
 import ReportListingForm from "@/components/ReportListingForm";
+import TrackProfileView from "@/components/TrackProfileView";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 function StarIcon() {
   return (
@@ -49,6 +51,7 @@ export default async function SellerProfilePage({
 
   return (
     <main className="mx-auto max-w-2xl px-4 pb-24 pt-6">
+      <TrackProfileView sellerId={seller.id} />
       {seller.photos.length > 0 ? (
         <div className="mb-4 grid grid-cols-3 gap-2">
           {seller.photos.map((photo) => (
@@ -94,14 +97,7 @@ export default async function SellerProfilePage({
 
       {seller.bio && <p className="mt-4 text-gray-700">{seller.bio}</p>}
 
-      <a
-        href={whatsappHref(seller.whatsappNumber)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-6 block w-full rounded-full bg-green-600 py-3 text-center font-semibold text-white transition hover:bg-green-700"
-      >
-        Message on WhatsApp
-      </a>
+      <WhatsAppButton sellerId={seller.id} href={whatsappHref(seller.whatsappNumber)} />
 
       <section className="mt-8">
         <h2 className="mb-3 text-lg font-semibold">Services</h2>

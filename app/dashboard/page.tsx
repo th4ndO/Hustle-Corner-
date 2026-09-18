@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSellerByOwner, getPhotoUrl } from "@/lib/sellers";
+import { getSellerStats } from "@/lib/stats";
 import { LIMITS } from "@/config";
 import EditBasicInfoForm from "@/components/EditBasicInfoForm";
 import AddServiceForm from "@/components/AddServiceForm";
@@ -24,6 +25,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const seller = await getSellerByOwner(user.id);
+  const stats = seller ? await getSellerStats(seller.id) : null;
 
   if (!seller) {
     return (
@@ -58,6 +60,30 @@ export default async function DashboardPage() {
           {STATUS_LABEL[seller.status] ?? seller.status}
         </span>
       </div>
+
+      {stats && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Stats
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-gray-200 p-3">
+              <p className="text-xs text-gray-500">Profile views</p>
+              <p className="text-lg font-semibold">
+                {stats.views7d} <span className="text-sm font-normal text-gray-400">/ 7d</span>
+              </p>
+              <p className="text-sm text-gray-500">{stats.views30d} in last 30d</p>
+            </div>
+            <div className="rounded-lg border border-gray-200 p-3">
+              <p className="text-xs text-gray-500">WhatsApp clicks</p>
+              <p className="text-lg font-semibold">
+                {stats.clicks7d} <span className="text-sm font-normal text-gray-400">/ 7d</span>
+              </p>
+              <p className="text-sm text-gray-500">{stats.clicks30d} in last 30d</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="mb-8">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
