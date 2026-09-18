@@ -74,14 +74,14 @@ export default async function DashboardPage() {
             <div className="rounded-lg border border-gray-200 p-3">
               <p className="text-xs text-gray-500">Profile views</p>
               <p className="text-lg font-semibold">
-                {stats.views7d} <span className="text-sm font-normal text-gray-400">/ 7d</span>
+                {stats.views7d} <span className="text-sm font-normal text-gray-500">/ 7d</span>
               </p>
               <p className="text-sm text-gray-500">{stats.views30d} in last 30d</p>
             </div>
             <div className="rounded-lg border border-gray-200 p-3">
               <p className="text-xs text-gray-500">WhatsApp clicks</p>
               <p className="text-lg font-semibold">
-                {stats.clicks7d} <span className="text-sm font-normal text-gray-400">/ 7d</span>
+                {stats.clicks7d} <span className="text-sm font-normal text-gray-500">/ 7d</span>
               </p>
               <p className="text-sm text-gray-500">{stats.clicks30d} in last 30d</p>
             </div>

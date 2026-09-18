@@ -117,7 +117,7 @@ export default async function SellerProfilePage({
             ? `${seller.avgRating.toFixed(1)} (${seller.reviewCount} review${seller.reviewCount === 1 ? "" : "s"})`
             : "No reviews yet"}
         </span>
-        {seller.areaNote && <span className="text-gray-400">· {seller.areaNote}</span>}
+        {seller.areaNote && <span className="text-gray-500">· {seller.areaNote}</span>}
       </div>
 
       {seller.bio && <p className="mt-4 text-gray-700">{seller.bio}</p>}
@@ -174,7 +174,7 @@ export default async function SellerProfilePage({
                   <div className="flex items-center gap-1 text-sm text-gray-600">
                     <StarIcon />
                     <span>{review.rating}/5</span>
-                    <span className="text-gray-400">· {review.authorName}</span>
+                    <span className="text-gray-500">· {review.authorName}</span>
                   </div>
                   {review.comment && <p className="mt-2 text-gray-700">{review.comment}</p>}
                 </li>
