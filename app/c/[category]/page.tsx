@@ -1,11 +1,29 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSellersByCategory, type CategorySort } from "@/lib/sellers";
+import { getSellersByCategory, getActiveCategories, type CategorySort } from "@/lib/sellers";
 import SellerCard from "@/components/SellerCard";
+import { APP_NAME, CAMPUS_NAME } from "@/config";
 
 const SORT_OPTIONS: { value: CategorySort; label: string }[] = [
   { value: "rating", label: "Top rated" },
   { value: "price", label: "Price: low to high" },
 ];
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}): Promise<Metadata> {
+  const { category: slug } = await params;
+  const categories = await getActiveCategories();
+  const category = categories.find((c) => c.slug === slug);
+  if (!category) return { title: `Category not found · ${APP_NAME}` };
+
+  return {
+    title: `${category.name} · ${APP_NAME}`,
+    description: `${category.name} sellers at ${CAMPUS_NAME} on ${APP_NAME}.`,
+  };
+}
 
 export default async function CategoryPage({
   params,

@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { serviceSchema } from "@/lib/validation";
 import { normalizeSaWhatsappNumber } from "@/lib/phone";
 import { LIMITS } from "@/config";
@@ -140,4 +142,42 @@ export async function deletePhoto(photoId: string, storagePath: string): Promise
 
   revalidatePath("/dashboard");
   return {};
+}
+
+// POPIA: lets a user erase their account. Deletes seller photos from
+// Storage first (their DB rows and everything else -- seller, services,
+// categories, reviews they wrote, reports they filed -- cascade from the
+// auth.users delete via the FK chain already in the schema), then deletes
+// the auth user itself via the Admin API, which is the officially
+// supported way to remove an account (a raw SQL delete on auth.users would
+// bypass Supabase Auth's own internal bookkeeping).
+export async function deleteOwnAccount(): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You need to be logged in." };
+
+  const { data: seller } = await supabase
+    .from("sellers")
+    .select("id")
+    .eq("owner_id", user.id)
+    .maybeSingle();
+
+  if (seller) {
+    const { data: photos } = await supabase
+      .from("seller_photos")
+      .select("storage_path")
+      .eq("seller_id", seller.id);
+    if (photos && photos.length > 0) {
+      await supabase.storage.from("seller-photos").remove(photos.map((p) => p.storage_path));
+    }
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) return { error: error.message };
+
+  await supabase.auth.signOut();
+  redirect("/");
 }

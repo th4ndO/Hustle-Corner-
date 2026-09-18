@@ -10,6 +10,7 @@ import AddServiceForm from "@/components/AddServiceForm";
 import DeleteServiceButton from "@/components/DeleteServiceButton";
 import DeletePhotoButton from "@/components/DeletePhotoButton";
 import DashboardPhotoUploader from "@/components/DashboardPhotoUploader";
+import DeleteAccountButton from "@/components/DeleteAccountButton";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending review",
@@ -40,6 +41,9 @@ export default async function DashboardPage() {
         >
           Become a seller
         </Link>
+        <div className="mt-10">
+          <DeleteAccountButton />
+        </div>
       </main>
     );
   }
@@ -137,6 +141,10 @@ export default async function DashboardPage() {
         </div>
         <DashboardPhotoUploader remaining={LIMITS.maxPortfolioPhotos - seller.photos.length} />
       </section>
+
+      <div className="mt-10 border-t border-gray-200 pt-6">
+        <DeleteAccountButton />
+      </div>
     </main>
   );
 }

@@ -1,14 +1,39 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSellerBySlug, getPhotoUrl } from "@/lib/sellers";
 import { createClient } from "@/lib/supabase/server";
-import { WHATSAPP_PREFILL_MESSAGE } from "@/config";
+import { APP_NAME, WHATSAPP_PREFILL_MESSAGE } from "@/config";
 import ReviewForm from "@/components/ReviewForm";
 import OwnReview from "@/components/OwnReview";
 import ReportListingForm from "@/components/ReportListingForm";
 import TrackProfileView from "@/components/TrackProfileView";
 import WhatsAppButton from "@/components/WhatsAppButton";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const seller = await getSellerBySlug(slug);
+  if (!seller) return { title: `Seller not found · ${APP_NAME}` };
+
+  const description =
+    seller.bio?.trim() ||
+    `${seller.businessName} on ${APP_NAME}${seller.areaNote ? ` · ${seller.areaNote}` : ""}`;
+
+  return {
+    title: `${seller.businessName} · ${APP_NAME}`,
+    description,
+    openGraph: {
+      title: seller.businessName,
+      description,
+      type: "profile",
+    },
+  };
+}
 
 function StarIcon() {
   return (
