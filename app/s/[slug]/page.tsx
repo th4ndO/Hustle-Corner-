@@ -156,7 +156,7 @@ export default async function SellerProfilePage({
           />
         ) : user && !isOwner ? (
           <ReviewForm sellerId={seller.id} slug={slug} />
-        ) : !user ? (
+        ) : !user && seller.reviews.length > 0 ? (
           <p className="text-sm text-gray-500">
             <Link href="/login" className="font-medium text-brand-600">
               Log in
@@ -181,7 +181,18 @@ export default async function SellerProfilePage({
               ))}
           </ul>
         ) : !ownReview ? (
-          <p className="text-gray-500">No reviews yet — be the first to leave one.</p>
+          <p className="text-gray-500">
+            No reviews yet.
+            {!user && (
+              <>
+                {" "}
+                <Link href="/login" className="font-medium text-brand-600">
+                  Log in
+                </Link>{" "}
+                to be the first to leave one.
+              </>
+            )}
+          </p>
         ) : null}
       </section>
 
