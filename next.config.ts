@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      // Onboarding submits up to 6 compressed photos (~1MB each) in one
+      // server action call.
+      bodySizeLimit: "10mb",
+    },
+  },
   images: {
     remotePatterns: [
       {

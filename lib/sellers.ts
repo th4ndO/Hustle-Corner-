@@ -16,6 +16,7 @@ export type SellerCard = {
 };
 
 export type SellerDetail = SellerCard & {
+  status: string;
   whatsappNumber: string;
   instagramHandle: string | null;
   services: { id: string; name: string; priceFrom: number; priceTo: number | null; durationMinutes: number | null }[];
@@ -179,28 +180,51 @@ export async function searchSellers(query: string): Promise<SellerCard[]> {
   return Array.from(bySlug.values());
 }
 
+type SellerDetailRow = SellerRow & {
+  status: string;
+  whatsapp_number: string;
+  instagram_handle: string | null;
+  reviews:
+    | { id: string; rating: number; comment: string | null; created_at: string; is_hidden: boolean; author_id: string }[]
+    | null;
+};
+
+const SELLER_DETAIL_SELECT = `${SELLER_CARD_SELECT}, status, whatsapp_number, instagram_handle,
+   reviews(id, rating, comment, created_at, is_hidden, author_id)`;
+
 export async function getSellerBySlug(slug: string): Promise<SellerDetail | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("sellers")
-    .select(
-      `${SELLER_CARD_SELECT}, whatsapp_number, instagram_handle,
-       reviews(id, rating, comment, created_at, is_hidden, author_id)`,
-    )
+    .select(SELLER_DETAIL_SELECT)
     .eq("slug", slug)
     .eq("status", "approved")
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
 
-  const row = data as unknown as SellerRow & {
-    whatsapp_number: string;
-    instagram_handle: string | null;
-    reviews:
-      | { id: string; rating: number; comment: string | null; created_at: string; is_hidden: boolean; author_id: string }[]
-      | null;
-  };
+  return mapSellerDetail(await createClient(), data as unknown as SellerDetailRow);
+}
 
+/** The logged-in user's own seller row, regardless of approval status. RLS
+ * already restricts this to the caller's own row (or an admin). */
+export async function getSellerByOwner(ownerId: string): Promise<SellerDetail | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sellers")
+    .select(SELLER_DETAIL_SELECT)
+    .eq("owner_id", ownerId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  return mapSellerDetail(supabase, data as unknown as SellerDetailRow);
+}
+
+async function mapSellerDetail(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  row: SellerDetailRow,
+): Promise<SellerDetail> {
   const visibleReviews = (row.reviews ?? []).filter((r) => !r.is_hidden);
   const authorIds = visibleReviews.map((r) => r.author_id);
   const authorNames = new Map<string, string>();
@@ -217,6 +241,7 @@ export async function getSellerBySlug(slug: string): Promise<SellerDetail | null
 
   return {
     ...card,
+    status: row.status,
     whatsappNumber: row.whatsapp_number,
     instagramHandle: row.instagram_handle,
     services: activeServices.map((s) => ({
