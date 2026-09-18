@@ -1,7 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSellerBySlug, getPhotoUrl } from "@/lib/sellers";
+import { createClient } from "@/lib/supabase/server";
 import { WHATSAPP_PREFILL_MESSAGE } from "@/config";
+import ReviewForm from "@/components/ReviewForm";
+import OwnReview from "@/components/OwnReview";
+import ReportListingForm from "@/components/ReportListingForm";
 
 function StarIcon() {
   return (
@@ -24,6 +29,23 @@ export default async function SellerProfilePage({
   const { slug } = await params;
   const seller = await getSellerBySlug(slug);
   if (!seller) notFound();
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const isOwner = user?.id === seller.ownerId;
+  let ownReview: { id: string; rating: number; comment: string | null } | null = null;
+  if (user && !isOwner) {
+    const { data } = await supabase
+      .from("reviews")
+      .select("id, rating, comment")
+      .eq("seller_id", seller.id)
+      .eq("author_id", user.id)
+      .maybeSingle();
+    ownReview = data;
+  }
 
   return (
     <main className="mx-auto max-w-2xl px-4 pb-24 pt-6">
@@ -101,25 +123,48 @@ export default async function SellerProfilePage({
         )}
       </section>
 
-      <section className="mt-8">
-        <h2 className="mb-3 text-lg font-semibold">Reviews</h2>
-        {seller.reviews.length > 0 ? (
+      <section className="mt-8 space-y-4">
+        <h2 className="text-lg font-semibold">Reviews</h2>
+
+        {ownReview ? (
+          <OwnReview
+            reviewId={ownReview.id}
+            slug={slug}
+            rating={ownReview.rating}
+            comment={ownReview.comment}
+          />
+        ) : user && !isOwner ? (
+          <ReviewForm sellerId={seller.id} slug={slug} />
+        ) : !user ? (
+          <p className="text-sm text-gray-500">
+            <Link href="/login" className="font-medium text-brand-600">
+              Log in
+            </Link>{" "}
+            to leave a review.
+          </p>
+        ) : null}
+
+        {seller.reviews.filter((r) => r.id !== ownReview?.id).length > 0 ? (
           <ul className="space-y-4">
-            {seller.reviews.map((review) => (
-              <li key={review.id} className="rounded-xl border border-gray-200 p-4">
-                <div className="flex items-center gap-1 text-sm text-gray-600">
-                  <StarIcon />
-                  <span>{review.rating}/5</span>
-                  <span className="text-gray-400">· {review.authorName}</span>
-                </div>
-                {review.comment && <p className="mt-2 text-gray-700">{review.comment}</p>}
-              </li>
-            ))}
+            {seller.reviews
+              .filter((r) => r.id !== ownReview?.id)
+              .map((review) => (
+                <li key={review.id} className="rounded-xl border border-gray-200 p-4">
+                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <StarIcon />
+                    <span>{review.rating}/5</span>
+                    <span className="text-gray-400">· {review.authorName}</span>
+                  </div>
+                  {review.comment && <p className="mt-2 text-gray-700">{review.comment}</p>}
+                </li>
+              ))}
           </ul>
-        ) : (
+        ) : !ownReview ? (
           <p className="text-gray-500">No reviews yet — be the first to leave one.</p>
-        )}
+        ) : null}
       </section>
+
+      {user && !isOwner && <ReportListingForm sellerId={seller.id} />}
     </main>
   );
 }

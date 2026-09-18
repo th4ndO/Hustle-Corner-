@@ -22,3 +22,12 @@ export const sellerOnboardingSchema = z.object({
 });
 
 export type SellerOnboardingInput = z.infer<typeof sellerOnboardingSchema>;
+
+export const reviewSchema = z.object({
+  rating: z.coerce.number().int().min(1, "Pick a rating").max(5),
+  comment: z.string().trim().max(LIMITS.reviewCommentMaxChars).optional().default(""),
+});
+
+export const reportSchema = z.object({
+  reason: z.string().trim().min(1, "Tell us what's wrong").max(300),
+});

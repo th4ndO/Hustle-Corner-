@@ -17,6 +17,7 @@ export type SellerCard = {
 
 export type SellerDetail = SellerCard & {
   status: string;
+  ownerId: string;
   whatsappNumber: string;
   instagramHandle: string | null;
   services: { id: string; name: string; priceFrom: number; priceTo: number | null; durationMinutes: number | null }[];
@@ -182,6 +183,7 @@ export async function searchSellers(query: string): Promise<SellerCard[]> {
 
 type SellerDetailRow = SellerRow & {
   status: string;
+  owner_id: string;
   whatsapp_number: string;
   instagram_handle: string | null;
   reviews:
@@ -189,7 +191,7 @@ type SellerDetailRow = SellerRow & {
     | null;
 };
 
-const SELLER_DETAIL_SELECT = `${SELLER_CARD_SELECT}, status, whatsapp_number, instagram_handle,
+const SELLER_DETAIL_SELECT = `${SELLER_CARD_SELECT}, status, owner_id, whatsapp_number, instagram_handle,
    reviews(id, rating, comment, created_at, is_hidden, author_id)`;
 
 export async function getSellerBySlug(slug: string): Promise<SellerDetail | null> {
@@ -242,6 +244,7 @@ async function mapSellerDetail(
   return {
     ...card,
     status: row.status,
+    ownerId: row.owner_id,
     whatsappNumber: row.whatsapp_number,
     instagramHandle: row.instagram_handle,
     services: activeServices.map((s) => ({
