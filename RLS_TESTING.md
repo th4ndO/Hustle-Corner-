@@ -6,9 +6,9 @@ the checklist for manually re-verifying that a user can never read or write data
 that isn't theirs — the brief's acceptance criterion: "RLS prevents users from
 editing anyone else's data."
 
-Two real bugs were already found this way during development (not by reading the
-policy SQL, but by actually doing the thing as a real logged-in user and checking
-the database afterward):
+Three real bugs were already found this way during development (not by reading
+the policy SQL, but by actually doing the thing as a real logged-in user and
+checking the database afterward):
 
 1. `reviews_sync_seller_rating` ran as `SECURITY INVOKER`, so its internal
    `UPDATE sellers` was silently blocked by sellers' own-row RLS whenever the
@@ -16,8 +16,20 @@ the database afterward):
 2. `storage.objects` (seller-photos bucket) had no `SELECT` policy, so an
    owner's photo delete/update silently no-op'd or 403'd even though the
    DELETE/UPDATE policies' own conditions were correct.
+3. `profiles_update_own_or_admin` and `sellers_update_own_or_admin` had a
+   `USING` clause but no `WITH CHECK`. Postgres reuses `USING` as the implicit
+   check when none is given, and that clause only restricts *which row* you
+   can touch, not *which columns* you change. Any authenticated user could
+   call `.update()` directly (bypassing the UI, which never exposes these
+   fields) and set their own `profiles.role` to `'admin'`, or their own
+   `sellers.status` to `'approved'` (skipping moderation entirely) and fake
+   `avg_rating`/`review_count`. Fixed in `0009_protect_privileged_columns.sql`
+   with `BEFORE UPDATE` triggers that block non-admins from touching those
+   specific columns.
 
-Neither would show up from reading the policy definitions alone. **Test by doing
+None of these show up from reading the policy definitions alone — bug 3
+especially *looks* like an ordinary owner-scoped policy at a glance; the gap
+is about which columns a column-blind row check lets through. **Test by doing
 the thing, not by reading the SQL.** The fastest way: two browser sessions (or
 one regular + one incognito), one logged in as User A, one as User B, with a
 seeded/approved seller you don't own.
@@ -43,6 +55,11 @@ For any "X can only touch their own Y" rule below:
 - [ ] User B cannot `update` User A's `role` to `'admin'` (self-serve admin
       escalation must be impossible — this is the most important one on this
       table).
+- [ ] A user cannot `update` **their own** `role` to `'admin'` or their own
+      `is_verified` to `true` via a direct `.update()` call (not just via the
+      UI, which never exposes these fields) — this is bug #3 above; the
+      `profiles_protect_privileged_columns_trigger` from
+      `0009_protect_privileged_columns.sql` should raise an error.
 - [ ] A logged-out visitor cannot `select` any profiles row.
 
 ## sellers
@@ -51,6 +68,14 @@ For any "X can only touch their own Y" rule below:
       number, status, etc.) — try via the dashboard edit form pointed at
       another seller's ID, and via a direct `.update()` call.
 - [ ] User B cannot `insert` a seller row with `owner_id` set to User A's ID.
+- [ ] A seller owner cannot `update` **their own** row's `status` to
+      `'approved'`, or their own `avg_rating`/`review_count`, via a direct
+      `.update()` call — this is bug #3 above; the
+      `sellers_protect_privileged_columns_trigger` from
+      `0009_protect_privileged_columns.sql` should raise an error. (Submitting
+      a real review should still update `avg_rating`/`review_count` normally —
+      that's the system doing it via `reviews_sync_seller_rating`, not the
+      owner, and the trigger is designed to tell the two apart.)
 - [ ] A visitor (logged out) can `select` only `status = 'approved'` sellers —
       a `pending` or `hidden` seller's slug should 404 on `/s/[slug]` for
       anyone except its owner or an admin.
