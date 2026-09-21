@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { serviceSchema } from "@/lib/validation";
 import { normalizeSaWhatsappNumber } from "@/lib/phone";
+import { validateJpegUpload } from "@/lib/imageValidation";
 import { LIMITS } from "@/config";
 
 async function requireOwnSeller() {
@@ -108,6 +109,11 @@ export async function addPhotos(formData: FormData): Promise<{ error?: string }>
     .getAll("photos")
     .filter((p): p is File => p instanceof File && p.size > 0)
     .slice(0, Math.max(0, LIMITS.maxPortfolioPhotos - currentCount));
+
+  for (const file of files) {
+    const validationError = await validateJpegUpload(file);
+    if (validationError) return { error: validationError };
+  }
 
   let sortOrder = currentCount;
   for (const file of files) {

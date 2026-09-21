@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { sellerOnboardingSchema, serviceSchema } from "@/lib/validation";
 import { normalizeSaWhatsappNumber } from "@/lib/phone";
+import { validateJpegUpload } from "@/lib/imageValidation";
 import { CAMPUS_SLUG, LIMITS } from "@/config";
 import { z } from "zod";
 
@@ -54,6 +55,10 @@ export async function onboardSeller(formData: FormData): Promise<{ error?: strin
     .slice(0, LIMITS.maxPortfolioPhotos);
   if (photoFiles.length < LIMITS.minPhotosToOnboard) {
     return { error: "Add at least one photo." };
+  }
+  for (const file of photoFiles) {
+    const validationError = await validateJpegUpload(file);
+    if (validationError) return { error: validationError };
   }
 
   const { data: campus } = await supabase
