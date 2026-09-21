@@ -28,15 +28,15 @@ export async function updateSellerBasicInfo(formData: FormData): Promise<{ error
   const { supabase, user, seller } = await requireOwnSeller();
   if (!user || !seller) return { error: "No seller profile found." };
 
-  const businessName = String(formData.get("businessName") ?? "").trim();
+  const businessName = String(formData.get("businessName") ?? "").trim().slice(0, 100);
   if (businessName.length < 2) return { error: "Business name is too short." };
 
   const whatsappNumber = normalizeSaWhatsappNumber(String(formData.get("whatsappNumber") ?? ""));
   if (!whatsappNumber) return { error: "That doesn't look like a valid SA WhatsApp number." };
 
   const bio = String(formData.get("bio") ?? "").trim().slice(0, LIMITS.bioMaxChars);
-  const areaNote = String(formData.get("areaNote") ?? "").trim();
-  const instagramHandle = String(formData.get("instagramHandle") ?? "").trim();
+  const areaNote = String(formData.get("areaNote") ?? "").trim().slice(0, 100);
+  const instagramHandle = String(formData.get("instagramHandle") ?? "").trim().slice(0, 50);
 
   const { error } = await supabase
     .from("sellers")
