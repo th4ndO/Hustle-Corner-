@@ -6,7 +6,7 @@ the checklist for manually re-verifying that a user can never read or write data
 that isn't theirs — the brief's acceptance criterion: "RLS prevents users from
 editing anyone else's data."
 
-Three real bugs were already found this way during development (not by reading
+Four real bugs were already found this way during development (not by reading
 the policy SQL, but by actually doing the thing as a real logged-in user and
 checking the database afterward):
 
@@ -26,6 +26,11 @@ checking the database afterward):
    `avg_rating`/`review_count`. Fixed in `0009_protect_privileged_columns.sql`
    with `BEFORE UPDATE` triggers that block non-admins from touching those
    specific columns.
+4. Same gap, same fix pattern, on `reviews_update_own_or_admin`: a review's
+   own author could flip `is_hidden` back to `false` after an admin hides
+   it for violating policy, or repoint `seller_id` at a *different*
+   approved seller (`reviews_reject_self_review` only blocks pointing it at
+   their own seller). Fixed in `0010_protect_review_privileged_columns.sql`.
 
 None of these show up from reading the policy definitions alone — bug 3
 especially *looks* like an ordinary owner-scoped policy at a glance; the gap
@@ -113,6 +118,13 @@ For any "X can only touch their own Y" rule below:
       to confirm the DB itself rejects it).
 - [ ] Hidden reviews (`is_hidden = true`) are invisible on the public seller
       page but still visible to the review's own author and to admins.
+- [ ] A review's own author cannot `update` its `is_hidden` (un-hiding a
+      moderated review) or `seller_id`/`author_id` via a direct `.update()`
+      call — this is bug #4 above; the
+      `reviews_protect_privileged_columns_trigger` from
+      `0010_protect_review_privileged_columns.sql` should raise an error.
+      (rating/comment stay editable by the author — only the moderation and
+      identity columns are locked down.)
 - [ ] After any review insert/update/delete, `sellers.avg_rating` and
       `review_count` actually change — this is the exact thing that was
       silently broken by bug #1 above. Don't just check the review row
