@@ -28,6 +28,23 @@ export async function setSellerStatus(
   return {};
 }
 
+export async function setSellerMicrosite(
+  sellerId: string,
+  hasMicrosite: boolean,
+): Promise<{ error?: string }> {
+  const { supabase, ok } = await requireAdmin();
+  if (!ok) return { error: "Admins only." };
+
+  const { error } = await supabase
+    .from("sellers")
+    .update({ has_microsite: hasMicrosite })
+    .eq("id", sellerId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return {};
+}
+
 export async function resolveReport(reportId: string): Promise<{ error?: string }> {
   const { supabase, ok } = await requireAdmin();
   if (!ok) return { error: "Admins only." };

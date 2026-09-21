@@ -7,6 +7,7 @@ import {
   getRecentReviewsForAdmin,
 } from "@/lib/admin";
 import SellerStatusButtons from "@/components/admin/SellerStatusButtons";
+import SellerMicrositeToggle from "@/components/admin/SellerMicrositeToggle";
 import ResolveReportButton from "@/components/admin/ResolveReportButton";
 import ReviewModerationButtons from "@/components/admin/ReviewModerationButtons";
 
@@ -52,7 +53,10 @@ export default async function AdminPage() {
                   {s.status}
                 </span>
               </div>
-              <SellerStatusButtons sellerId={s.id} status={s.status} />
+              <div className="flex items-center gap-2">
+                <SellerMicrositeToggle sellerId={s.id} hasMicrosite={s.hasMicrosite} />
+                <SellerStatusButtons sellerId={s.id} status={s.status} />
+              </div>
             </li>
           ))}
           {sellers.length === 0 && <p className="text-gray-500">No sellers yet.</p>}

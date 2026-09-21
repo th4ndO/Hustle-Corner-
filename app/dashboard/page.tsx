@@ -11,6 +11,7 @@ import DeleteServiceButton from "@/components/DeleteServiceButton";
 import DeletePhotoButton from "@/components/DeletePhotoButton";
 import DashboardPhotoUploader from "@/components/DashboardPhotoUploader";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
+import MicrositeForm from "@/components/MicrositeForm";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending review",
@@ -95,6 +96,15 @@ export default async function DashboardPage() {
         </h2>
         <EditBasicInfoForm seller={seller} />
       </section>
+
+      {seller.hasMicrosite && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Micro-site
+          </h2>
+          <MicrositeForm seller={seller} />
+        </section>
+      )}
 
       <section className="mb-8">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">

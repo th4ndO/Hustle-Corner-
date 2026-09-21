@@ -81,6 +81,11 @@ For any "X can only touch their own Y" rule below:
       a real review should still update `avg_rating`/`review_count` normally —
       that's the system doing it via `reviews_sync_seller_rating`, not the
       owner, and the trigger is designed to tell the two apart.)
+- [ ] A seller owner cannot `update` their own row's `has_microsite` to
+      `true` via a direct `.update()` call — it's a paid, admin-only toggle
+      (`0011_seller_microsites.sql`, same trigger as the `status` check
+      above). `microsite_tagline`/`microsite_theme_color`/`microsite_story`
+      *are* owner-editable once an admin turns `has_microsite` on.
 - [ ] A visitor (logged out) can `select` only `status = 'approved'` sellers —
       a `pending` or `hidden` seller's slug should 404 on `/s/[slug]` for
       anyone except its owner or an admin.

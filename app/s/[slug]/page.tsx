@@ -74,9 +74,28 @@ export default async function SellerProfilePage({
     ownReview = data;
   }
 
+  const accentColor = seller.hasMicrosite ? seller.micrositeThemeColor : null;
+
   return (
     <main className="mx-auto max-w-2xl px-4 pb-24 pt-6">
       <TrackProfileView sellerId={seller.id} />
+      {seller.hasMicrosite && seller.photos[0] && (
+        <div className="relative -mx-4 mb-4 aspect-[2/1] overflow-hidden bg-gray-100 sm:mx-0 sm:rounded-xl">
+          <Image
+            src={getPhotoUrl(seller.photos[0].storagePath)}
+            alt={`${seller.businessName} banner`}
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority
+          />
+          {seller.micrositeTagline && (
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+              <p className="font-medium text-white">{seller.micrositeTagline}</p>
+            </div>
+          )}
+        </div>
+      )}
       {seller.photos.length > 0 ? (
         <div className="mb-4 grid grid-cols-3 gap-2">
           {seller.photos.map((photo) => (
@@ -102,13 +121,16 @@ export default async function SellerProfilePage({
           <span
             key={c.slug}
             className="inline-block rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700"
+            style={accentColor ? { backgroundColor: `${accentColor}1a`, color: accentColor } : undefined}
           >
             {c.name}
           </span>
         ))}
       </div>
 
-      <h1 className="text-2xl font-bold">{seller.businessName}</h1>
+      <h1 className="text-2xl font-bold" style={accentColor ? { color: accentColor } : undefined}>
+        {seller.businessName}
+      </h1>
 
       <div className="mt-1 flex items-center gap-1 text-sm text-gray-600">
         <StarIcon />
@@ -123,6 +145,13 @@ export default async function SellerProfilePage({
       {seller.bio && <p className="mt-4 text-gray-700">{seller.bio}</p>}
 
       <WhatsAppButton sellerId={seller.id} href={whatsappHref(seller.whatsappNumber)} />
+
+      {seller.hasMicrosite && seller.micrositeStory && (
+        <section className="mt-8">
+          <h2 className="mb-3 text-lg font-semibold">Our story</h2>
+          <p className="whitespace-pre-wrap text-gray-700">{seller.micrositeStory}</p>
+        </section>
+      )}
 
       <section className="mt-8">
         <h2 className="mb-3 text-lg font-semibold">Services</h2>

@@ -6,6 +6,7 @@ export type AdminSeller = {
   slug: string;
   status: string;
   createdAt: string;
+  hasMicrosite: boolean;
 };
 
 export type AdminReport = {
@@ -44,7 +45,7 @@ export async function getAllSellersForAdmin(): Promise<AdminSeller[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("sellers")
-    .select("id, business_name, slug, status, created_at")
+    .select("id, business_name, slug, status, created_at, has_microsite")
     .order("status", { ascending: true })
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -55,6 +56,7 @@ export async function getAllSellersForAdmin(): Promise<AdminSeller[]> {
     slug: s.slug,
     status: s.status,
     createdAt: s.created_at,
+    hasMicrosite: s.has_microsite,
   }));
 }
 

@@ -20,6 +20,10 @@ export type SellerDetail = SellerCard & {
   ownerId: string;
   whatsappNumber: string;
   instagramHandle: string | null;
+  hasMicrosite: boolean;
+  micrositeTagline: string | null;
+  micrositeThemeColor: string | null;
+  micrositeStory: string | null;
   services: { id: string; name: string; priceFrom: number; priceTo: number | null; durationMinutes: number | null }[];
   photos: { id: string; storagePath: string }[];
   reviews: { id: string; rating: number; comment: string | null; createdAt: string; authorName: string }[];
@@ -186,12 +190,17 @@ type SellerDetailRow = SellerRow & {
   owner_id: string;
   whatsapp_number: string;
   instagram_handle: string | null;
+  has_microsite: boolean;
+  microsite_tagline: string | null;
+  microsite_theme_color: string | null;
+  microsite_story: string | null;
   reviews:
     | { id: string; rating: number; comment: string | null; created_at: string; is_hidden: boolean; author_id: string }[]
     | null;
 };
 
 const SELLER_DETAIL_SELECT = `${SELLER_CARD_SELECT}, status, owner_id, whatsapp_number, instagram_handle,
+   has_microsite, microsite_tagline, microsite_theme_color, microsite_story,
    reviews(id, rating, comment, created_at, is_hidden, author_id)`;
 
 export async function getSellerBySlug(slug: string): Promise<SellerDetail | null> {
@@ -247,6 +256,10 @@ async function mapSellerDetail(
     ownerId: row.owner_id,
     whatsappNumber: row.whatsapp_number,
     instagramHandle: row.instagram_handle,
+    hasMicrosite: row.has_microsite,
+    micrositeTagline: row.microsite_tagline,
+    micrositeThemeColor: row.microsite_theme_color,
+    micrositeStory: row.microsite_story,
     services: activeServices.map((s) => ({
       id: s.id,
       name: s.name,

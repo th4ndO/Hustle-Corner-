@@ -31,3 +31,15 @@ export const reviewSchema = z.object({
 export const reportSchema = z.object({
   reason: z.string().trim().min(1, "Tell us what's wrong").max(300),
 });
+
+export const micrositeSchema = z.object({
+  tagline: z.string().trim().max(80).optional().default(""),
+  themeColor: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Pick a color")
+    .optional()
+    .or(z.literal(""))
+    .default(""),
+  story: z.string().trim().max(1000).optional().default(""),
+});

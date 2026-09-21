@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { serviceSchema } from "@/lib/validation";
+import { serviceSchema, micrositeSchema } from "@/lib/validation";
 import { normalizeSaWhatsappNumber } from "@/lib/phone";
 import { validateJpegUpload } from "@/lib/imageValidation";
 import { LIMITS } from "@/config";
@@ -18,7 +18,7 @@ async function requireOwnSeller() {
 
   const { data: seller } = await supabase
     .from("sellers")
-    .select("id")
+    .select("id, has_microsite")
     .eq("owner_id", user.id)
     .maybeSingle();
   return { supabase, user, seller };
@@ -46,6 +46,32 @@ export async function updateSellerBasicInfo(formData: FormData): Promise<{ error
       area_note: areaNote || null,
       instagram_handle: instagramHandle || null,
       whatsapp_number: whatsappNumber,
+    })
+    .eq("id", seller.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  return {};
+}
+
+export async function updateMicrosite(formData: FormData): Promise<{ error?: string }> {
+  const { supabase, user, seller } = await requireOwnSeller();
+  if (!user || !seller) return { error: "No seller profile found." };
+  if (!seller.has_microsite) return { error: "Micro-site isn't enabled for your listing." };
+
+  const parsed = micrositeSchema.safeParse({
+    tagline: formData.get("tagline"),
+    themeColor: formData.get("themeColor"),
+    story: formData.get("story"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Please check your entries." };
+
+  const { error } = await supabase
+    .from("sellers")
+    .update({
+      microsite_tagline: parsed.data.tagline || null,
+      microsite_theme_color: parsed.data.themeColor || null,
+      microsite_story: parsed.data.story || null,
     })
     .eq("id", seller.id);
   if (error) return { error: error.message };
