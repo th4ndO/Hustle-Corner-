@@ -19,6 +19,38 @@ export default async function HomePage() {
         </p>
       </section>
 
+      <section className="mb-10">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          How it works
+        </h2>
+        <div className="space-y-3">
+          {[
+            {
+              title: "Find a seller",
+              body: "Browse by category or search for what you need.",
+            },
+            {
+              title: "Message on WhatsApp",
+              body: "Chat directly with them — no booking or payment through the site.",
+            },
+            {
+              title: "Get it done",
+              body: "Meet up, get your service, then leave a review to help other students.",
+            },
+          ].map((step, i) => (
+            <div key={step.title} className="flex items-start gap-3 rounded-xl border border-gray-200 p-4">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white">
+                {i + 1}
+              </span>
+              <div>
+                <p className="font-medium">{step.title}</p>
+                <p className="text-sm text-gray-500">{step.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {categories.length > 0 && (
         <section className="mb-10">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
