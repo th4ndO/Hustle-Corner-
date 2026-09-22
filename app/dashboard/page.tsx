@@ -40,7 +40,7 @@ export default async function DashboardPage() {
           href="/dashboard/become-seller"
           className="mt-6 inline-block rounded-full bg-brand-600 px-6 py-3 font-semibold text-white"
         >
-          Become a seller
+          List your first service
         </Link>
         <div className="mt-10">
           <DeleteAccountButton />

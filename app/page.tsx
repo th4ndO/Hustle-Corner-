@@ -12,10 +12,12 @@ export default async function HomePage() {
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16">
       <section className="py-10 text-center">
-        <h1 className="text-3xl font-bold text-brand-600">{APP_NAME}</h1>
+        <h1 className="text-3xl font-bold text-brand-600">
+          Find student hustles near campus
+        </h1>
         <p className="mx-auto mt-2 max-w-sm text-gray-600">
-          Find trusted student services at {CAMPUS_NAME} — with real reviews
-          from real students.
+          Real students at {CAMPUS_NAME} offering real services — message
+          them directly on WhatsApp, no app, no middleman.
         </p>
       </section>
 

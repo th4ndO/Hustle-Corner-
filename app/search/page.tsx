@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { searchSellers } from "@/lib/sellers";
 import SellerCard from "@/components/SellerCard";
 
@@ -19,7 +20,11 @@ export default async function SearchPage({
 
       {q && sellers.length === 0 && (
         <p className="text-gray-500">
-          No sellers found for &quot;{q}&quot;. Try a different search.
+          No sellers found for &quot;{q}&quot;. Try a different search, or{" "}
+          <Link href="/" className="font-medium text-brand-600">
+            browse all categories
+          </Link>
+          .
         </p>
       )}
 

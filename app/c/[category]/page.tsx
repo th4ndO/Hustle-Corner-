@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSellersByCategory, getActiveCategories, type CategorySort } from "@/lib/sellers";
 import SellerCard from "@/components/SellerCard";
@@ -104,7 +105,17 @@ export default async function CategoryPage({
         </div>
       ) : (
         <p className="text-gray-500">
-          No {category.name.toLowerCase()} sellers match these filters yet.
+          No {category.name.toLowerCase()} sellers match these filters yet.{" "}
+          {minPrice != null || maxPrice != null || minRating != null ? (
+            <Link href={`/c/${categorySlug}`} className="font-medium text-brand-600">
+              Clear filters
+            </Link>
+          ) : (
+            <Link href="/" className="font-medium text-brand-600">
+              Browse other categories
+            </Link>
+          )}
+          .
         </p>
       )}
     </main>
