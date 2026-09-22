@@ -473,7 +473,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
           <button
             type="button"
             onClick={() => goToStep(step - 1)}
-            className="flex-1 rounded-full border border-gray-300 py-3 font-medium"
+            className="shrink-0 rounded-full border border-gray-300 px-6 py-3 font-medium"
           >
             Back
           </button>
@@ -482,7 +482,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
           <button
             type="button"
             onClick={handleNext}
-            className="flex-1 rounded-full bg-brand-600 py-3 font-semibold text-white"
+            className="flex-1 rounded-full bg-brand-600 px-4 py-3 font-semibold text-white"
           >
             Next
           </button>
@@ -491,7 +491,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
             type="button"
             disabled={submitting}
             onClick={handleSubmit}
-            className="flex-1 rounded-full bg-brand-600 py-3 font-semibold text-white disabled:opacity-50"
+            className="flex-1 rounded-full bg-brand-600 px-4 py-3 font-semibold text-white disabled:opacity-50"
           >
             {submitting ? "Submitting…" : "Submit for review"}
           </button>
