@@ -20,7 +20,7 @@ export default function WhatsAppButton({ sellerId, href }: { sellerId: string; h
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
-      className="mt-6 block w-full rounded-full bg-green-700 py-3 text-center font-semibold text-white transition hover:bg-green-800"
+      className="mt-6 block w-full rounded-full bg-green-700 py-3 text-center font-semibold text-white transition hover:bg-green-800 active:scale-95"
     >
       Message on WhatsApp
     </a>

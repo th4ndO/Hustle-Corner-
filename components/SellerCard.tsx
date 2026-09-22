@@ -15,7 +15,7 @@ export default function SellerCard({ seller }: { seller: SellerCardData }) {
   return (
     <Link
       href={`/s/${seller.slug}`}
-      className="block overflow-hidden rounded-xl border border-gray-200 transition hover:shadow-md"
+      className="block overflow-hidden rounded-xl border border-gray-200 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
     >
       <div className="relative aspect-square w-full bg-gray-100">
         {seller.photoPath ? (

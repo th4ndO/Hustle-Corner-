@@ -29,8 +29,11 @@ export default function ReportListingForm({ sellerId }: { sellerId: string }) {
 
   return (
     <form action={formAction} className="mt-6 rounded-xl border border-gray-200 p-4">
-      <p className="mb-2 text-sm font-medium">What&apos;s wrong?</p>
+      <label htmlFor="reason" className="mb-2 block text-sm font-medium">
+        What&apos;s wrong?
+      </label>
       <textarea
+        id="reason"
         name="reason"
         placeholder="Tell us what happened"
         rows={3}
