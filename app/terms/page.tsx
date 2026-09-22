@@ -8,12 +8,12 @@ export default function TermsPage() {
       <p className="mb-4 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
         TODO: review before launch
       </p>
-      <h1 className="mb-6 text-2xl font-bold">Terms of Use</h1>
+      <h1 className="mb-8 text-2xl font-bold">Terms of Use</h1>
 
-      <div className="space-y-6 text-gray-700">
+      <div className="space-y-8 text-gray-700">
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">What {APP_NAME} is</h2>
-          <p>
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">What {APP_NAME} is</h2>
+          <p className="leading-relaxed">
             {APP_NAME} is a directory that helps students at the University
             of Pretoria (Hatfield) find and list side-hustle services. We
             don&apos;t process payments, take bookings, or act as a party to
@@ -22,9 +22,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">Sellers</h2>
-          <p>
+        <section className="border-t border-gray-100 pt-8">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">Sellers</h2>
+          <p className="leading-relaxed">
             By listing on {APP_NAME}, you agree that your business
             information, prices, photos, and WhatsApp number will be shown
             publicly, and that the information you provide is accurate.
@@ -33,18 +33,18 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">Reviews</h2>
-          <p>
+        <section className="border-t border-gray-100 pt-8">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">Reviews</h2>
+          <p className="leading-relaxed">
             Reviews must reflect a genuine experience with the seller. Fake,
             abusive, or unrelated reviews may be removed, and repeated abuse
             may result in account suspension.
           </p>
         </section>
 
-        <section>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">No warranty</h2>
-          <p>
+        <section className="border-t border-gray-100 pt-8">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">No warranty</h2>
+          <p className="leading-relaxed">
             {APP_NAME} is provided as-is. We don&apos;t guarantee the quality,
             safety, or legality of any listed service — see our{" "}
             <a href="/safety" className="text-brand-600 underline">
@@ -54,7 +54,7 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <p className="text-sm text-gray-500">
+        <p className="border-t border-gray-100 pt-8 text-sm text-gray-500">
           TODO: have these terms reviewed properly (e.g. by a lawyer or the
           university&apos;s student affairs office) before real launch.
         </p>

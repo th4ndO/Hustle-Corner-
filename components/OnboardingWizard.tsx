@@ -222,7 +222,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
 
   return (
     <div className="mx-auto max-w-sm px-4 py-10">
-      <div className="mb-4">
+      <div className="mb-6">
         <p className="mb-2 text-sm text-gray-500">Step {step} of {TOTAL_STEPS}</p>
         <div className="flex gap-1">
           {Array.from({ length: TOTAL_STEPS }, (_, i) => (
@@ -238,13 +238,18 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
       </div>
 
       {step === 1 && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <h1 className="text-xl font-bold">Tell us about your business</h1>
+
           <div>
+            <label htmlFor="businessName" className="mb-1.5 block text-sm font-medium text-gray-700">
+              Business name
+            </label>
             <input
+              id="businessName"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value.slice(0, BUSINESS_NAME_MAX))}
-              placeholder="Business name"
+              placeholder="e.g. Campus Curls"
               maxLength={BUSINESS_NAME_MAX}
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
@@ -252,11 +257,16 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               {businessName.length}/{BUSINESS_NAME_MAX}
             </p>
           </div>
+
           <div>
+            <label htmlFor="bio" className="mb-1.5 block text-sm font-medium text-gray-700">
+              Bio
+            </label>
             <textarea
+              id="bio"
               value={bio}
               onChange={(e) => setBio(e.target.value.slice(0, LIMITS.bioMaxChars))}
-              placeholder="A short bio"
+              placeholder="What you do and what makes it good"
               rows={4}
               maxLength={LIMITS.bioMaxChars}
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
@@ -265,37 +275,58 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               {bio.length}/{LIMITS.bioMaxChars}
             </p>
           </div>
+
           <div>
+            <label htmlFor="areaNote" className="mb-1.5 block text-sm font-medium text-gray-700">
+              Area
+            </label>
             <input
+              id="areaNote"
               value={areaNote}
               onChange={(e) => setAreaNote(e.target.value.slice(0, AREA_NOTE_MAX))}
-              placeholder="Area, e.g. Hatfield, near Hillcrest"
+              placeholder="e.g. Hatfield, near Hillcrest"
               maxLength={AREA_NOTE_MAX}
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
           </div>
+
           <div>
+            <label htmlFor="instagramHandle" className="mb-1.5 block text-sm font-medium text-gray-700">
+              Instagram <span className="font-normal text-gray-400">(optional)</span>
+            </label>
             <input
+              id="instagramHandle"
               value={instagramHandle}
               onChange={(e) => setInstagramHandle(e.target.value.slice(0, INSTAGRAM_HANDLE_MAX))}
-              placeholder="Instagram handle (optional)"
+              placeholder="@yourhandle"
               maxLength={INSTAGRAM_HANDLE_MAX}
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
           </div>
 
-          <h2 className="pt-2 text-sm font-semibold text-gray-700">What do you offer?</h2>
-          <div className="space-y-2">
-            {categories.map((c) => (
-              <label key={c.slug} className="flex items-center gap-3 rounded-lg border border-gray-300 px-4 py-3">
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes(c.slug)}
-                  onChange={() => toggleCategory(c.slug)}
-                />
-                {c.name}
-              </label>
-            ))}
+          <div className="border-t border-gray-200 pt-5">
+            <h2 className="mb-1.5 text-sm font-medium text-gray-700">What do you offer?</h2>
+            <div className="space-y-2">
+              {categories.map((c) => {
+                const checked = selectedCategories.includes(c.slug);
+                return (
+                  <label
+                    key={c.slug}
+                    className={`flex items-center gap-3 rounded-lg border px-4 py-3 transition ${
+                      checked ? "border-brand-500 bg-brand-50" : "border-gray-300"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleCategory(c.slug)}
+                      className="h-4 w-4 accent-brand-600"
+                    />
+                    <span className={checked ? "font-medium text-brand-700" : ""}>{c.name}</span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -304,45 +335,57 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
         <div className="space-y-4">
           <h1 className="text-xl font-bold">Your services</h1>
           {services.map((s, i) => (
-            <div key={i} className="space-y-2 rounded-lg border border-gray-300 p-4">
+            <div key={i} className="space-y-3 rounded-lg border border-gray-300 p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700">Service {i + 1}</p>
+                {services.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setServices((prev) => prev.filter((_, idx) => idx !== i))}
+                    className="text-sm text-red-600"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
               <input
                 value={s.name}
                 onChange={(e) => updateService(i, { name: e.target.value })}
-                placeholder="Service name"
+                placeholder="Service name, e.g. Box braids"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2"
               />
               <div className="flex gap-2">
+                <div className="w-1/2">
+                  <label className="mb-1 block text-xs text-gray-500">Price from (R)</label>
+                  <input
+                    type="number"
+                    value={s.priceFrom}
+                    onChange={(e) => updateService(i, { priceFrom: e.target.value })}
+                    placeholder="250"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                  />
+                </div>
+                <div className="w-1/2">
+                  <label className="mb-1 block text-xs text-gray-500">Price to (optional)</label>
+                  <input
+                    type="number"
+                    value={s.priceTo}
+                    onChange={(e) => updateService(i, { priceTo: e.target.value })}
+                    placeholder="400"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-gray-500">Duration in minutes (optional)</label>
                 <input
                   type="number"
-                  value={s.priceFrom}
-                  onChange={(e) => updateService(i, { priceFrom: e.target.value })}
-                  placeholder="Price from (R)"
-                  className="w-1/2 rounded-lg border border-gray-300 px-3 py-2"
-                />
-                <input
-                  type="number"
-                  value={s.priceTo}
-                  onChange={(e) => updateService(i, { priceTo: e.target.value })}
-                  placeholder="Price to (optional)"
-                  className="w-1/2 rounded-lg border border-gray-300 px-3 py-2"
+                  value={s.durationMinutes}
+                  onChange={(e) => updateService(i, { durationMinutes: e.target.value })}
+                  placeholder="120"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
                 />
               </div>
-              <input
-                type="number"
-                value={s.durationMinutes}
-                onChange={(e) => updateService(i, { durationMinutes: e.target.value })}
-                placeholder="Duration in minutes (optional)"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2"
-              />
-              {services.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => setServices((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="text-sm text-red-600"
-                >
-                  Remove
-                </button>
-              )}
             </div>
           ))}
           <button
@@ -356,12 +399,12 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
       )}
 
       {step === 3 && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <h1 className="text-xl font-bold">Add photos</h1>
           <p className="text-sm text-gray-500">
             Up to {LIMITS.maxPortfolioPhotos} photos of your work. They&apos;re compressed automatically.
           </p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-3">
             {photos.map((p, i) => (
               <div key={i} className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -393,20 +436,26 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
       )}
 
       {step === 4 && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <h1 className="text-xl font-bold">Almost done</h1>
-          <input
-            value={whatsappNumber}
-            onChange={(e) => setWhatsappNumber(e.target.value)}
-            placeholder="WhatsApp number, e.g. 082 123 4567"
-            className="w-full rounded-lg border border-gray-300 px-4 py-3"
-          />
-          <label className="flex items-start gap-3 text-sm text-gray-600">
+          <div>
+            <label htmlFor="whatsappNumber" className="mb-1.5 block text-sm font-medium text-gray-700">
+              WhatsApp number
+            </label>
+            <input
+              id="whatsappNumber"
+              value={whatsappNumber}
+              onChange={(e) => setWhatsappNumber(e.target.value)}
+              placeholder="082 123 4567"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+            />
+          </div>
+          <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 text-sm text-gray-600">
             <input
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-1"
+              className="mt-1 h-4 w-4 accent-brand-600"
             />
             I agree that my WhatsApp number and business info will be shown
             publicly on {typeof window !== "undefined" ? window.location.hostname : "the site"}.

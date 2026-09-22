@@ -8,19 +8,19 @@ export default function PrivacyPage() {
       <p className="mb-4 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
         TODO: review before launch
       </p>
-      <h1 className="mb-6 text-2xl font-bold">Privacy Policy</h1>
+      <h1 className="mb-8 text-2xl font-bold">Privacy Policy</h1>
 
-      <div className="space-y-6 text-gray-700">
-        <p>
+      <div className="space-y-8 text-gray-700">
+        <p className="leading-relaxed">
           This policy explains what {APP_NAME} collects, why, and how you can
           have it removed. {APP_NAME} operates for students at the University
           of Pretoria (Hatfield) and aims to collect only what&apos;s needed
           to run the directory.
         </p>
 
-        <section>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">What we collect</h2>
-          <ul className="list-disc space-y-1 pl-5">
+        <section className="border-t border-gray-100 pt-8">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">What we collect</h2>
+          <ul className="list-disc space-y-2 pl-5 leading-relaxed">
             <li>Your name and email address, when you create an account.</li>
             <li>
               If you become a seller: your business name, bio, WhatsApp
@@ -35,9 +35,9 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        <section>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">Why we collect it</h2>
-          <p>
+        <section className="border-t border-gray-100 pt-8">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">Why we collect it</h2>
+          <p className="leading-relaxed">
             To run the directory: showing seller listings to buyers, letting
             sellers manage their profile, verifying reviewers are real
             students, and showing sellers how many people viewed their
@@ -45,9 +45,9 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">What&apos;s public</h2>
-          <p>
+        <section className="border-t border-gray-100 pt-8">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">What&apos;s public</h2>
+          <p className="leading-relaxed">
             A seller&apos;s business name, bio, area note, category, services,
             prices, photos, WhatsApp number, and reviews are shown publicly
             on their profile. Your name and email as a student account are
@@ -56,11 +56,11 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">
+        <section className="border-t border-gray-100 pt-8">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">
             Requesting deletion
           </h2>
-          <p>
+          <p className="leading-relaxed">
             You can delete your account and seller profile at any time from
             your dashboard, which also removes your uploaded photos. If you
             need help, TODO: add a contact email here before launch.
