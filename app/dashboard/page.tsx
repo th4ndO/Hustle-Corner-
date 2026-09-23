@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSellerByOwner, getPhotoUrl } from "@/lib/sellers";
 import { getSellerStats } from "@/lib/stats";
+import { getSellerAvailabilityRules } from "@/lib/availability";
+import { getSellerAppointments } from "@/lib/appointments";
 import { LIMITS } from "@/config";
 import EditBasicInfoForm from "@/components/EditBasicInfoForm";
 import AddServiceForm from "@/components/AddServiceForm";
@@ -12,6 +14,8 @@ import DeletePhotoButton from "@/components/DeletePhotoButton";
 import DashboardPhotoUploader from "@/components/DashboardPhotoUploader";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
 import MicrositeForm from "@/components/MicrositeForm";
+import AvailabilityRulesForm from "@/components/AvailabilityRulesForm";
+import AppointmentsQueue from "@/components/AppointmentsQueue";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending review",
@@ -28,6 +32,8 @@ export default async function DashboardPage() {
 
   const seller = await getSellerByOwner(user.id);
   const stats = seller ? await getSellerStats(seller.id) : null;
+  const availabilityRules = seller ? await getSellerAvailabilityRules(seller.id) : [];
+  const appointments = seller ? await getSellerAppointments(seller.id) : [];
 
   if (!seller) {
     return (
@@ -105,6 +111,20 @@ export default async function DashboardPage() {
           <MicrositeForm seller={seller} />
         </section>
       )}
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          Appointments
+        </h2>
+        <AppointmentsQueue appointments={appointments} />
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          Availability
+        </h2>
+        <AvailabilityRulesForm rules={availabilityRules} />
+      </section>
 
       <section className="mb-8">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">

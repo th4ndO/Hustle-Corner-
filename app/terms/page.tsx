@@ -16,9 +16,23 @@ export default function TermsPage() {
           <p className="leading-relaxed">
             {APP_NAME} is a directory that helps students at the University
             of Pretoria (Hatfield) find and list side-hustle services. We
-            don&apos;t process payments, take bookings, or act as a party to
-            any transaction between a buyer and a seller — those happen
-            directly between you and the seller, over WhatsApp.
+            don&apos;t process payments or act as a party to any transaction
+            between a buyer and a seller — the actual service, and any
+            money that changes hands for it, is arranged directly between
+            you and the seller, over WhatsApp.
+          </p>
+        </section>
+
+        <section className="border-t border-gray-100 pt-8">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">Appointments</h2>
+          <p className="leading-relaxed">
+            Some sellers let you request an appointment time through{" "}
+            {APP_NAME}. Requesting a slot isn&apos;t a guarantee — the seller
+            still has to confirm it, and either side can cancel. {APP_NAME}
+            schedules the time; it doesn&apos;t manage payment, enforce a
+            cancellation policy, or take responsibility if a seller or buyer
+            doesn&apos;t show up. Sort that out directly with each other, the
+            same as any other part of the arrangement.
           </p>
         </section>
 

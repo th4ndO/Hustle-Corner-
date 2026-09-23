@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSellerBySlug, getPhotoUrl } from "@/lib/sellers";
+import { getOpenSlots } from "@/lib/availability";
 import { createClient } from "@/lib/supabase/server";
 import { APP_NAME, WHATSAPP_PREFILL_MESSAGE } from "@/config";
 import ReviewForm from "@/components/ReviewForm";
@@ -10,6 +11,7 @@ import OwnReview from "@/components/OwnReview";
 import ReportListingForm from "@/components/ReportListingForm";
 import TrackProfileView from "@/components/TrackProfileView";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import BookAppointmentForm from "@/components/BookAppointmentForm";
 
 export async function generateMetadata({
   params,
@@ -73,6 +75,8 @@ export default async function SellerProfilePage({
       .maybeSingle();
     ownReview = data;
   }
+
+  const openSlots = isOwner ? [] : await getOpenSlots(seller.id);
 
   const accentColor = seller.hasMicrosite ? seller.micrositeThemeColor : null;
 
@@ -172,6 +176,27 @@ export default async function SellerProfilePage({
           <p className="text-gray-500">No services listed yet.</p>
         )}
       </section>
+
+      {!isOwner && openSlots.length > 0 && (
+        user ? (
+          <BookAppointmentForm
+            sellerId={seller.id}
+            slug={slug}
+            services={seller.services.map((s) => ({ id: s.id, name: s.name }))}
+            slots={openSlots}
+          />
+        ) : (
+          <section className="mt-8">
+            <h2 className="mb-3 text-lg font-semibold">Book an appointment</h2>
+            <p className="text-sm text-gray-500">
+              <Link href="/login" className="font-medium text-brand-600">
+                Log in
+              </Link>{" "}
+              to request an appointment.
+            </p>
+          </section>
+        )
+      )}
 
       <section className="mt-8 space-y-4">
         <h2 className="text-lg font-semibold">Reviews</h2>

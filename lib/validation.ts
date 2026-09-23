@@ -43,3 +43,17 @@ export const micrositeSchema = z.object({
     .default(""),
   story: z.string().trim().max(1000).optional().default(""),
 });
+
+export const availabilityRuleSchema = z.object({
+  dayOfWeek: z.coerce.number().int().min(0).max(6),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Pick a start time"),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/, "Pick an end time"),
+  slotMinutes: z.coerce.number().int().min(5).max(480),
+});
+
+export const bookAppointmentSchema = z.object({
+  startAt: z.string().datetime({ message: "Pick a valid time" }),
+  endAt: z.string().datetime({ message: "Pick a valid time" }),
+  serviceId: z.string().uuid().optional().or(z.literal("")),
+  note: z.string().trim().max(300).optional().default(""),
+});

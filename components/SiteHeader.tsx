@@ -32,6 +32,14 @@ export default async function SiteHeader() {
             className="h-10 w-full rounded-full border border-brand-500 bg-white px-4 text-sm text-gray-900 placeholder:text-gray-500 focus:border-white focus-visible:outline-brand-500"
           />
         </form>
+        {user && (
+          <Link
+            href="/bookings"
+            className="flex shrink-0 items-center py-2 text-sm font-medium text-white/90 focus-visible:outline-white"
+          >
+            Bookings
+          </Link>
+        )}
         {isAdmin && (
           <Link
             href="/admin"

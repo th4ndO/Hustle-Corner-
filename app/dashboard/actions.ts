@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { serviceSchema, micrositeSchema } from "@/lib/validation";
+import { serviceSchema, micrositeSchema, availabilityRuleSchema } from "@/lib/validation";
 import { normalizeSaWhatsappNumber } from "@/lib/phone";
 import { validateJpegUpload } from "@/lib/imageValidation";
 import { LIMITS } from "@/config";
@@ -169,6 +169,49 @@ export async function deletePhoto(photoId: string, storagePath: string): Promise
     .from("seller_photos")
     .delete()
     .eq("id", photoId)
+    .eq("seller_id", seller.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  return {};
+}
+
+export async function addAvailabilityRule(formData: FormData): Promise<{ error?: string }> {
+  const { supabase, user, seller } = await requireOwnSeller();
+  if (!user || !seller) return { error: "No seller profile found." };
+
+  const parsed = availabilityRuleSchema.safeParse({
+    dayOfWeek: formData.get("dayOfWeek"),
+    startTime: formData.get("startTime"),
+    endTime: formData.get("endTime"),
+    slotMinutes: formData.get("slotMinutes"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid availability rule." };
+  if (parsed.data.endTime <= parsed.data.startTime) {
+    return { error: "End time must be after start time." };
+  }
+
+  const { error } = await supabase.from("seller_availability_rules").insert({
+    seller_id: seller.id,
+    day_of_week: parsed.data.dayOfWeek,
+    start_time: parsed.data.startTime,
+    end_time: parsed.data.endTime,
+    slot_minutes: parsed.data.slotMinutes,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  return {};
+}
+
+export async function deleteAvailabilityRule(ruleId: string): Promise<{ error?: string }> {
+  const { supabase, user, seller } = await requireOwnSeller();
+  if (!user || !seller) return { error: "No seller profile found." };
+
+  const { error } = await supabase
+    .from("seller_availability_rules")
+    .delete()
+    .eq("id", ruleId)
     .eq("seller_id", seller.id);
   if (error) return { error: error.message };
 

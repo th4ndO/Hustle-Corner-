@@ -152,6 +152,41 @@ For any "X can only touch their own Y" rule below:
       insert by design; re-verify by visiting your own `/s/[slug]` while
       logged in as its owner and confirming no new row appears).
 
+## seller_availability_rules, appointments
+
+- [ ] User B (not the seller owner) cannot add/edit/delete availability
+      rules on User A's seller.
+- [ ] A visitor (including logged out) can `select` availability rules for
+      an `approved` seller (needed to compute open slots on the public
+      profile page), but not for a `pending`/`hidden` seller they don't own.
+- [ ] A seller cannot book an appointment with their own listing (the
+      `appointments_reject_self_booking` trigger should raise an error —
+      try it directly, the booking form is hidden on your own profile).
+- [ ] Two overlapping booking requests for the *same* seller and *exact
+      same start time* cannot both succeed — the second one should fail
+      with a unique-constraint error (`appointments_no_double_booking`),
+      not silently create a second row. This is the actual no-double-
+      booking guarantee; test it as a real race if you can (two tabs,
+      submit both at once), not just sequentially.
+- [ ] A buyer cannot `update` their own appointment's `status` to
+      `'confirmed'` directly (only a seller can confirm/decline a pending
+      request) — try it as a direct `.update()` call from the buyer's
+      session. The `appointments_protect_privileged_columns_trigger`
+      should raise an error.
+- [ ] A buyer *can* `update` their own appointment's `status` to
+      `'cancelled'` (from `pending` or `confirmed`), but not from
+      `declined`/`cancelled` (already closed).
+- [ ] A seller cannot change `start_at`/`end_at`/`buyer_id`/`seller_id` on
+      an existing appointment via a direct `.update()` call — booking
+      details are immutable after creation; cancel and rebook instead of
+      "rescheduling" one in place.
+- [ ] User B cannot `select` an appointment that isn't theirs (not the
+      buyer, not the seller it's booked with, not admin).
+- [ ] A seller can see and confirm/decline appointments for their own
+      seller row regardless of who the buyer is, via `/dashboard`.
+- [ ] A buyer can see all their own appointments across every seller via
+      `/bookings`, and cancel a pending or confirmed one from there.
+
 ## Admin bypass
 
 - [ ] Every rule above that says "only the owner" should also allow an

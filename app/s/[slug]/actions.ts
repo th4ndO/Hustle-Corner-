@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { reviewSchema, reportSchema } from "@/lib/validation";
+import { reviewSchema, reportSchema, bookAppointmentSchema } from "@/lib/validation";
 
 export async function submitReview(
   sellerId: string,
@@ -78,5 +78,48 @@ export async function submitReport(
   });
   if (error) return { error: error.message };
 
+  return { success: true };
+}
+
+export async function bookAppointment(
+  sellerId: string,
+  slug: string,
+  formData: FormData,
+): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You need to be logged in to request an appointment." };
+
+  const parsed = bookAppointmentSchema.safeParse({
+    startAt: formData.get("startAt"),
+    endAt: formData.get("endAt"),
+    serviceId: formData.get("serviceId"),
+    note: formData.get("note"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please pick a valid time." };
+  }
+  if (new Date(parsed.data.startAt).getTime() <= Date.now()) {
+    return { error: "That time has already passed -- pick another slot." };
+  }
+
+  const { error } = await supabase.from("appointments").insert({
+    seller_id: sellerId,
+    buyer_id: user.id,
+    service_id: parsed.data.serviceId || null,
+    start_at: parsed.data.startAt,
+    end_at: parsed.data.endAt,
+    note: parsed.data.note || null,
+  });
+  if (error) {
+    if (error.code === "23505") {
+      return { error: "That slot was just booked by someone else -- pick another." };
+    }
+    return { error: error.message };
+  }
+
+  revalidatePath(`/s/${slug}`);
   return { success: true };
 }
