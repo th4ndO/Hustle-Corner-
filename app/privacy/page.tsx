@@ -39,8 +39,8 @@ export default function PrivacyPage() {
           <h2 className="mb-3 text-lg font-semibold text-gray-900">Why we collect it</h2>
           <p className="leading-relaxed">
             To run the directory: showing seller listings to buyers, letting
-            sellers manage their profile, verifying reviewers are real
-            students, and showing sellers how many people viewed their
+            sellers manage their profile, tying each review to a real
+            account, and showing sellers how many people viewed their
             listing or messaged them.
           </p>
         </section>

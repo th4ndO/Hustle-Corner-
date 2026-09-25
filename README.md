@@ -50,13 +50,11 @@ Renaming: the product name lives in one place, `config.ts` (`APP_NAME`).
 
 ## Project config
 
-All app-wide constants (name, allowed student email domains, active
-categories, upload limits) live in `config.ts`.
+All app-wide constants (name, active categories, upload limits) live in
+`config.ts`.
 
-**Before Phase 3 (auth/verification) starts:** `ALLOWED_EMAIL_DOMAINS` in
-`config.ts` is a placeholder (`tuks.co.za`) pending confirmation of the
-correct UP student email domain(s) — update it there before relying on
-email-domain verification.
+There is no student email verification by design: every signup is treated
+as verified (see the `handle_new_user` trigger in migration 0005).
 
 ## Migrations
 
