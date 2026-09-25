@@ -1,4 +1,4 @@
-# CampusHustle
+# The Business Corner
 
 A campus side-hustle directory MVP for University of Pretoria (Hatfield).
 Students list services (hair, nails, tutoring, ...); other students browse,

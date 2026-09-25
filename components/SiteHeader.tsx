@@ -17,14 +17,16 @@ export default async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-10 border-b border-brand-700 bg-brand-600">
-      <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-2">
+      <div className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-3 px-4 py-2">
         <Link
           href="/"
-          className="flex shrink-0 items-center py-2 text-lg font-bold text-white focus-visible:outline-white"
+          className="mr-auto flex shrink-0 items-center py-2 text-base font-bold sm:text-lg text-white focus-visible:outline-white sm:mr-0"
         >
           {APP_NAME}
         </Link>
-        <form action="/search" method="get" className="flex flex-1 items-center">
+        {/* Phones: search drops to its own full-width row under the name + nav
+            links, so the longer product name never squeezes it. */}
+        <form action="/search" method="get" className="order-last mb-1 flex w-full items-center sm:order-none sm:mb-0 sm:w-auto sm:flex-1">
           <input
             type="search"
             name="q"

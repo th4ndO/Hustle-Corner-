@@ -1,7 +1,7 @@
 // Single source of truth for app-wide constants.
 // Change APP_NAME here to rename the product everywhere.
 
-export const APP_NAME = "CampusHustle";
+export const APP_NAME = "The Business Corner";
 
 export const CAMPUS_SLUG = "up-hatfield";
 export const CAMPUS_NAME = "University of Pretoria - Hatfield";

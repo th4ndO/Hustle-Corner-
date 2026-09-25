@@ -40,7 +40,7 @@ const FAKE_SELLERS = [
 ];
 
 async function main() {
-  console.log("Seeding CampusHustle local dev data...");
+  console.log("Seeding The Business Corner local dev data...");
 
   const { data: campus, error: campusError } = await supabase
     .from("campuses")
