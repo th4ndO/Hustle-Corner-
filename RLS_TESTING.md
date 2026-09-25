@@ -204,10 +204,18 @@ function` on an existing trigger/RPC must re-specify every `alter function
 afterward** — don't assume a REPLACE preserves anything beyond the body.
 
 0013 also revoked a leftover `anon` EXECUTE grant on
-`get_appointment_party_names`/`get_review_author_names` that survived
-despite their migrations' `revoke all ... from public` — not a real data
-leak (both gate on `auth.uid()` matching a real relationship, so anon just
-gets zero rows), but there's no reason to leave it grantable.
+`get_appointment_party_names` (correct: it gates on `auth.uid()`, so anon
+only ever got zero rows) **and** on `get_review_author_names` — which was a
+mistake. That one is deliberately public (0003): it returns names for
+non-hidden reviews on approved sellers, the same rows `reviews_select`
+already shows everyone. The revoke made the RPC return `42501` for every
+logged-out visitor, and `lib/sellers.ts` swallows the error, so reviewer
+names silently fell back to a placeholder on public seller pages. Restored
+in 0014. **Lesson: before revoking a grant, check who actually calls the
+function (`grep -rn "rpc(\"<name>\""`), not just what an advisor flags.**
+
+**Test:** logged out, open an approved seller with a review → the reviewer's
+real name shows, not the placeholder.
 
 ## Admin bypass
 
