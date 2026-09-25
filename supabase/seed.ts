@@ -16,6 +16,16 @@ if (!url || !serviceRoleKey) {
   );
 }
 
+// Hard stop, not just a comment: these fake sellers once sat on the live
+// site for over a week with real-format SA WhatsApp numbers. Seed a
+// separate dev project or a local `supabase start` stack instead.
+const PRODUCTION_PROJECT_REF = "ulbzuafadfxdymrtdzgy";
+if (url.includes(PRODUCTION_PROJECT_REF)) {
+  throw new Error(
+    `Refusing to seed: ${url} is the production project. Point .env.local at a dev project.`,
+  );
+}
+
 const supabase = createClient(url, serviceRoleKey);
 
 const CATEGORIES = [

@@ -34,7 +34,8 @@ Renaming: the product name lives in one place, `config.ts` (`APP_NAME`).
    ```
    This requires `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` and creates
    fake auth users (`seed-seller-N@example.test`) plus seller profiles.
-   **Never run this against a production project.**
+   **Never run this against a production project** — the script refuses
+   to run when `NEXT_PUBLIC_SUPABASE_URL` points at the production project.
 5. Start the dev server:
    ```
    npm run dev
