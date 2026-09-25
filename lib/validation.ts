@@ -57,3 +57,18 @@ export const bookAppointmentSchema = z.object({
   serviceId: z.string().uuid().optional().or(z.literal("")),
   note: z.string().trim().max(300).optional().default(""),
 });
+
+export type PasswordRequirement = { label: string; met: boolean };
+
+export function passwordRequirements(password: string): PasswordRequirement[] {
+  return [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+    { label: "One lowercase letter", met: /[a-z]/.test(password) },
+    { label: "One number", met: /[0-9]/.test(password) },
+  ];
+}
+
+export function isStrongPassword(password: string): boolean {
+  return passwordRequirements(password).every((r) => r.met);
+}

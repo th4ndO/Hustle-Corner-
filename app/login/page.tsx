@@ -4,22 +4,49 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { APP_NAME } from "@/config";
+import { passwordRequirements, isStrongPassword } from "@/lib/validation";
 
 type Mode = "login" | "signup";
 type Status = "idle" | "submitting" | "error" | "check-email";
+
+const inputClassName =
+  "w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-brand-500";
 
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const requirements = passwordRequirements(password);
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+  const canSubmitSignup = isStrongPassword(password) && passwordsMatch;
+
+  function switchMode() {
+    setMode(mode === "login" ? "signup" : "login");
+    setConfirmPassword("");
+    setStatus("idle");
+    setErrorMessage("");
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setStatus("submitting");
     setErrorMessage("");
+
+    if (mode === "signup" && !canSubmitSignup) {
+      setStatus("error");
+      setErrorMessage(
+        !isStrongPassword(password)
+          ? "Choose a stronger password."
+          : "Passwords don't match.",
+      );
+      return;
+    }
+
+    setStatus("submitting");
     const supabase = createClient();
 
     if (mode === "login") {
@@ -90,7 +117,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-brand-500"
+            className={inputClassName}
           />
         </div>
         <div>
@@ -104,13 +131,51 @@ export default function LoginPage() {
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Min. 8 characters"
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-brand-500"
+            placeholder={mode === "signup" ? "Create a password" : "Password"}
+            className={inputClassName}
           />
+          {mode === "signup" && password.length > 0 && (
+            <ul className="mt-2 space-y-0.5 text-xs">
+              {requirements.map((r) => (
+                <li
+                  key={r.label}
+                  className={r.met ? "text-green-600" : "text-gray-400"}
+                >
+                  {r.met ? "✓" : "○"} {r.label}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
+        {mode === "signup" && (
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
+              Confirm password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter your password"
+              className={
+                confirmPassword.length > 0 && !passwordsMatch
+                  ? `${inputClassName} border-red-400`
+                  : inputClassName
+              }
+            />
+            {confirmPassword.length > 0 && !passwordsMatch && (
+              <p className="mt-1.5 text-xs text-red-600">Passwords don&apos;t match.</p>
+            )}
+          </div>
+        )}
         <button
           type="submit"
-          disabled={status === "submitting"}
+          disabled={status === "submitting" || (mode === "signup" && !canSubmitSignup)}
           className="w-full rounded-full bg-brand-600 py-3 font-semibold text-white transition hover:bg-brand-700 disabled:opacity-50"
         >
           {status === "submitting"
@@ -124,15 +189,7 @@ export default function LoginPage() {
         )}
       </form>
 
-      <button
-        type="button"
-        onClick={() => {
-          setMode(mode === "login" ? "signup" : "login");
-          setStatus("idle");
-          setErrorMessage("");
-        }}
-        className="mt-6 w-full text-center text-sm font-medium text-brand-600"
-      >
+      <button type="button" onClick={switchMode} className="mt-6 w-full text-center text-sm font-medium text-brand-600">
         {mode === "login"
           ? "New here? Create an account"
           : "Already have an account? Log in"}
