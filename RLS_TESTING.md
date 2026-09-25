@@ -187,6 +187,28 @@ For any "X can only touch their own Y" rule below:
 - [ ] A buyer can see all their own appointments across every seller via
       `/bookings`, and cancel a pending or confirmed one from there.
 
+## Bug #5: `CREATE OR REPLACE FUNCTION` silently drops `search_path`
+
+Found by the Supabase security advisor right after applying 0010-0012 live,
+not by manual testing. 0011's `create or replace function
+sellers_protect_privileged_columns()` (to add the `has_microsite` check)
+redefined the function without repeating 0009's `set search_path = public`.
+`CREATE OR REPLACE` doesn't merge configuration from the old definition —
+whatever the new statement doesn't specify is reset — so this silently
+un-pinned the search_path on a function that calls `is_admin()`, reopening
+it to search_path hijacking (an authenticated user could in principle create
+an object earlier in their session's search_path that shadows `is_admin`).
+Fixed in 0013 by re-pinning it. **Lesson: any future `create or replace
+function` on an existing trigger/RPC must re-specify every `alter function
+... set ...` the original had, or run a fresh security advisor check
+afterward** — don't assume a REPLACE preserves anything beyond the body.
+
+0013 also revoked a leftover `anon` EXECUTE grant on
+`get_appointment_party_names`/`get_review_author_names` that survived
+despite their migrations' `revoke all ... from public` — not a real data
+leak (both gate on `auth.uid()` matching a real relationship, so anon just
+gets zero rows), but there's no reason to leave it grantable.
+
 ## Admin bypass
 
 - [ ] Every rule above that says "only the owner" should also allow an
