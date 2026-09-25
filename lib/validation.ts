@@ -66,6 +66,9 @@ export function passwordRequirements(password: string): PasswordRequirement[] {
     { label: "One uppercase letter", met: /[A-Z]/.test(password) },
     { label: "One lowercase letter", met: /[a-z]/.test(password) },
     { label: "One number", met: /[0-9]/.test(password) },
+    // Mirrors the Supabase Auth password requirement (Authentication ->
+    // Sign In / Providers -> Email), which only counts these characters.
+    { label: "One symbol (e.g. ! @ # ?)", met: /[!@#$%^&*()_+\-=[\]{};'\\:"|<>?,./`~]/.test(password) },
   ];
 }
 
