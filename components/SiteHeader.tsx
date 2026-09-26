@@ -34,39 +34,51 @@ export default async function SiteHeader() {
             className="h-10 w-full rounded-full border border-brand-500 bg-white px-4 text-sm text-gray-900 placeholder:text-gray-500 focus:border-white focus-visible:outline-brand-500"
           />
         </form>
-        {user && (
-          <Link
-            href="/bookings"
-            className="flex shrink-0 items-center py-2 text-sm font-medium text-white/90 focus-visible:outline-white"
-          >
-            Bookings
-          </Link>
-        )}
-        {isAdmin && (
-          <Link
-            href="/admin"
-            className="flex shrink-0 items-center py-2 text-sm font-medium text-white/90 focus-visible:outline-white"
-          >
-            Admin
-          </Link>
-        )}
-        {user ? (
-          <form action={signOut} className="shrink-0">
-            <button
-              type="submit"
-              className="flex items-center py-2 text-sm text-white/80 hover:text-white focus-visible:outline-white"
+        {/* Account links stay together, so on phones they wrap onto one row
+            of their own instead of splitting across two. */}
+        <div className="flex shrink-0 items-center gap-x-3">
+          {user && (
+            <Link
+              href="/dashboard"
+              className="flex shrink-0 items-center py-2 text-sm font-medium text-white/90 focus-visible:outline-white"
             >
-              Log out
-            </button>
-          </form>
-        ) : (
-          <Link
-            href="/login"
-            className="flex shrink-0 items-center py-2 text-sm font-medium text-white focus-visible:outline-white"
-          >
-            Log in
-          </Link>
-        )}
+              Dashboard
+            </Link>
+          )}
+          {user && (
+            <Link
+              href="/bookings"
+              className="flex shrink-0 items-center py-2 text-sm font-medium text-white/90 focus-visible:outline-white"
+            >
+              Bookings
+            </Link>
+          )}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="flex shrink-0 items-center py-2 text-sm font-medium text-white/90 focus-visible:outline-white"
+            >
+              Admin
+            </Link>
+          )}
+          {user ? (
+            <form action={signOut} className="shrink-0">
+              <button
+                type="submit"
+                className="flex items-center py-2 text-sm text-white/80 hover:text-white focus-visible:outline-white"
+              >
+                Log out
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/login"
+              className="flex shrink-0 items-center py-2 text-sm font-medium text-white focus-visible:outline-white"
+            >
+              Log in
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );
