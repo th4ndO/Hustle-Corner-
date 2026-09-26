@@ -33,7 +33,7 @@ export default async function HomePage() {
             },
             {
               title: "Message on WhatsApp",
-              body: "Chat directly with them — no booking or payment through the site.",
+              body: "Chat directly, or request an appointment if they take bookings. You pay the seller directly, never through the site.",
             },
             {
               title: "Get it done",
@@ -51,6 +51,15 @@ export default async function HomePage() {
             </div>
           ))}
         </div>
+        <p className="mt-3 text-sm">
+          <Link href="/how-it-works" className="font-medium text-brand-600">
+            Step-by-step guide
+          </Link>
+          <span className="text-gray-400"> · </span>
+          <Link href="/how-it-works?for=business" className="font-medium text-brand-600">
+            List your business
+          </Link>
+        </p>
       </section>
 
       {categories.length > 0 && (
