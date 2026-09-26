@@ -79,10 +79,11 @@ const CUSTOMER_STEPS: Step[] = [
     title: "Leave a review",
     body: (
       <>
-        Back on the seller&apos;s profile, pick a star rating, say how it went
-        and tap <strong>Submit review</strong>. Honest reviews help other
-        students choose. If something went wrong, use{" "}
-        <strong>Report this listing</strong> at the bottom of the profile.
+        Log in, go back to the seller&apos;s profile, pick a star rating, say
+        how it went and tap <strong>Submit review</strong>. Honest reviews
+        help other students choose. If something went wrong, use{" "}
+        <strong>Report this listing</strong> at the bottom of the profile
+        (also only shown when you&apos;re logged in).
       </>
     ),
   },
