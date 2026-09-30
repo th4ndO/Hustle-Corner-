@@ -34,7 +34,13 @@ export async function getSellerAvailabilityRules(sellerId: string): Promise<Avai
 export async function getOpenSlots(sellerId: string): Promise<OpenSlot[]> {
   const supabase = await createClient();
 
-  const rules = await getSellerAvailabilityRules(sellerId);
+  let rules: AvailabilityRule[];
+  try {
+    rules = await getSellerAvailabilityRules(sellerId);
+  } catch (err) {
+    console.error("[getOpenSlots] availability rules failed", err);
+    return [];
+  }
   if (rules.length === 0) return [];
 
   const now = new Date();
@@ -46,7 +52,13 @@ export async function getOpenSlots(sellerId: string): Promise<OpenSlot[]> {
   const { data: taken, error } = await supabase.rpc("get_taken_slots", {
     p_seller_id: sellerId,
   });
-  if (error) throw error;
+  if (error) {
+    // Don't take the whole seller page down over the booking widget (e.g. if
+    // 0016 isn't applied yet): log it and offer no slots, so the page still
+    // shows the listing and the WhatsApp button.
+    console.error("[getOpenSlots] get_taken_slots failed", error.code ?? "-", error.message);
+    return [];
+  }
 
   // Compare by millisecond value, not raw string, since Postgres's
   // timestamptz string format doesn't necessarily match Date#toISOString().
