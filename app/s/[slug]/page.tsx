@@ -12,6 +12,7 @@ import ReportListingForm from "@/components/ReportListingForm";
 import TrackProfileView from "@/components/TrackProfileView";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import BookAppointmentForm from "@/components/BookAppointmentForm";
+import { loginHref } from "@/lib/safeNext";
 
 export async function generateMetadata({
   params,
@@ -189,7 +190,7 @@ export default async function SellerProfilePage({
           <section className="mt-8">
             <h2 className="mb-3 text-lg font-semibold">Book an appointment</h2>
             <p className="text-sm text-gray-500">
-              <Link href="/login" className="font-medium text-brand-600">
+              <Link href={loginHref(`/s/${slug}`)} className="font-medium text-brand-600">
                 Log in
               </Link>{" "}
               to request an appointment.
@@ -212,7 +213,7 @@ export default async function SellerProfilePage({
           <ReviewForm sellerId={seller.id} slug={slug} />
         ) : !user && seller.reviews.length > 0 ? (
           <p className="text-sm text-gray-500">
-            <Link href="/login" className="font-medium text-brand-600">
+            <Link href={loginHref(`/s/${slug}`)} className="font-medium text-brand-600">
               Log in
             </Link>{" "}
             to leave a review.
@@ -240,7 +241,7 @@ export default async function SellerProfilePage({
             {!user && (
               <>
                 {" "}
-                <Link href="/login" className="font-medium text-brand-600">
+                <Link href={loginHref(`/s/${slug}`)} className="font-medium text-brand-600">
                   Log in
                 </Link>{" "}
                 to be the first to leave one.

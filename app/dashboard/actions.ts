@@ -8,6 +8,7 @@ import { serviceSchema, micrositeSchema, availabilityRuleSchema } from "@/lib/va
 import { normalizeSaWhatsappNumber } from "@/lib/phone";
 import { validateJpegUpload } from "@/lib/imageValidation";
 import { LIMITS } from "@/config";
+import { friendlyError } from "@/lib/errors";
 
 async function requireOwnSeller() {
   const supabase = await createClient();
@@ -48,7 +49,7 @@ export async function updateSellerBasicInfo(formData: FormData): Promise<{ error
       whatsapp_number: whatsappNumber,
     })
     .eq("id", seller.id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -74,7 +75,7 @@ export async function updateMicrosite(formData: FormData): Promise<{ error?: str
       microsite_story: parsed.data.story || null,
     })
     .eq("id", seller.id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -100,7 +101,7 @@ export async function addService(formData: FormData): Promise<{ error?: string }
     duration_minutes: parsed.data.durationMinutes ?? null,
     is_active: true,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -115,7 +116,7 @@ export async function deleteService(serviceId: string): Promise<{ error?: string
     .delete()
     .eq("id", serviceId)
     .eq("seller_id", seller.id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -147,12 +148,12 @@ export async function addPhotos(formData: FormData): Promise<{ error?: string }>
     const { error: uploadError } = await supabase.storage
       .from("seller-photos")
       .upload(path, file, { contentType: "image/jpeg" });
-    if (uploadError) return { error: uploadError.message };
+    if (uploadError) return { error: friendlyError(uploadError, "Couldn't upload one of your photos. Try a different photo, or try again in a moment.") };
 
     const { error: rowError } = await supabase
       .from("seller_photos")
       .insert({ seller_id: seller.id, storage_path: path, sort_order: sortOrder });
-    if (rowError) return { error: rowError.message };
+    if (rowError) return { error: friendlyError(rowError) };
     sortOrder++;
   }
 
@@ -170,7 +171,7 @@ export async function deletePhoto(photoId: string, storagePath: string): Promise
     .delete()
     .eq("id", photoId)
     .eq("seller_id", seller.id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -198,7 +199,7 @@ export async function addAvailabilityRule(formData: FormData): Promise<{ error?:
     end_time: parsed.data.endTime,
     slot_minutes: parsed.data.slotMinutes,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -213,7 +214,7 @@ export async function deleteAvailabilityRule(ruleId: string): Promise<{ error?: 
     .delete()
     .eq("id", ruleId)
     .eq("seller_id", seller.id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -251,7 +252,7 @@ export async function deleteOwnAccount(): Promise<{ error?: string }> {
 
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.deleteUser(user.id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   await supabase.auth.signOut();
   redirect("/");

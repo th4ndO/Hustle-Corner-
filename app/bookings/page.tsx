@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getBuyerAppointments } from "@/lib/appointments";
 import BuyerAppointmentRow from "@/components/BuyerAppointmentRow";
+import { loginHref } from "@/lib/safeNext";
 
 export default async function BookingsPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect(loginHref("/bookings"));
 
   const appointments = await getBuyerAppointments(user.id);
 

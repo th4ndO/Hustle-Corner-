@@ -2,13 +2,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveCategories } from "@/lib/sellers";
 import OnboardingWizard from "@/components/OnboardingWizard";
+import { loginHref } from "@/lib/safeNext";
 
 export default async function BecomeSellerPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect(loginHref("/dashboard/become-seller", "signup"));
 
   const { data: existing } = await supabase
     .from("sellers")

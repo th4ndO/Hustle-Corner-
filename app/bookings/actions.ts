@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { friendlyError } from "@/lib/errors";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -37,7 +38,7 @@ export async function confirmAppointment(appointmentId: string): Promise<{ error
     .from("appointments")
     .update({ status: "confirmed" })
     .eq("id", appointmentId);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -52,7 +53,7 @@ export async function declineAppointment(appointmentId: string): Promise<{ error
     .from("appointments")
     .update({ status: "declined" })
     .eq("id", appointmentId);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   return {};
@@ -66,7 +67,7 @@ export async function cancelAppointment(appointmentId: string): Promise<{ error?
     .from("appointments")
     .update({ status: "cancelled" })
     .eq("id", appointmentId);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/dashboard");
   revalidatePath("/bookings");

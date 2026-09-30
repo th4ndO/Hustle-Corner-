@@ -1,8 +1,12 @@
--- Proof for 0015_fix_is_admin_recursion. Paste the whole file into the
--- Supabase SQL editor (runs as postgres) and run it once.
+-- Proof for 0015_fix_is_admin_recursion and 0016_public_taken_slots. Paste
+-- the whole file into the Supabase SQL editor (runs as postgres) and run it
+-- once.
+--
+-- Expected: PROOF RESULT: 48 of 48 checks passed.
 --
 -- What it does, in one transaction:
---   1. applies the 0015 body (same statements as the migration file),
+--   1. applies the 0015 and 0016 bodies (same statements as the migration
+--      files),
 --   2. seeds throwaway users U/A/B/admin, two sellers, an availability rule
 --      and one appointment (emails end in @test.invalid),
 --   3. runs every check as anon / a simulated signed-in user
@@ -66,6 +70,31 @@ grant execute on function public.is_admin() to service_role;
 grant execute on function public.is_verified_student() to service_role;
 
 -- ---------------------------------------------------------------------------
+-- 0016 body (keep identical to supabase/migrations/0016_public_taken_slots.sql)
+-- ---------------------------------------------------------------------------
+
+create or replace function public.get_taken_slots(p_seller_id uuid)
+returns table (start_at timestamptz)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select a.start_at
+  from public.appointments a
+  join public.sellers s on s.id = a.seller_id
+  where a.seller_id = p_seller_id
+    and s.status = 'approved'
+    and a.status in ('pending', 'confirmed')
+    and a.start_at >= now()
+    and a.start_at < now() + interval '15 days'
+  order by a.start_at;
+$$;
+
+revoke all on function public.get_taken_slots(uuid) from public, anon, authenticated;
+grant execute on function public.get_taken_slots(uuid) to anon, authenticated, service_role;
+
+-- ---------------------------------------------------------------------------
 -- results table (written to while impersonating anon/authenticated)
 -- ---------------------------------------------------------------------------
 
@@ -80,7 +109,7 @@ declare
   b_uid uuid := gen_random_uuid();    -- B: verified, buyer, owns a PENDING seller
   adm_uid uuid := gen_random_uuid();  -- admin
   camp uuid; sel uuid; sel_b uuid;
-  n int; b boolean;
+  n int; b boolean; ts timestamptz;
   t timestamptz := date_trunc('hour', now()) + interval '3 days';
   tbl text;
   passed int; total int; lines text;
@@ -154,6 +183,30 @@ begin
     insert into _results (test, expected, actual, pass) values ('anon is_verified_student()', 'false', b::text, b = false);
   exception when others then
     insert into _results (test, expected, actual, pass) values ('anon is_verified_student()', 'false', sqlstate, false);
+  end;
+  -- 0016: anon sees the one seeded pending slot of the approved seller.
+  begin
+    select count(*), max(g.start_at) into n, ts from public.get_taken_slots(sel) g;
+    insert into _results (test, expected, actual, pass)
+      values ('anon get_taken_slots(approved seller) count', '1', n::text, n = 1);
+    insert into _results (test, expected, actual, pass)
+      values ('anon get_taken_slots returns the seeded start_at', 'true', coalesce((ts = t)::text, 'null'), ts is not distinct from t);
+  exception when others then
+    insert into _results (test, expected, actual, pass)
+      values ('anon get_taken_slots(approved seller) count', '1', sqlstate, false);
+    insert into _results (test, expected, actual, pass)
+      values ('anon get_taken_slots returns the seeded start_at', 'true', sqlstate, false);
+  end;
+  -- Fixed signature: the row anon gets back has exactly one column, start_at
+  -- (no ids, buyer, status or note).
+  begin
+    select string_agg(k, ',' order by k) into tbl
+      from (select * from public.get_taken_slots(sel) limit 1) r, jsonb_object_keys(to_jsonb(r)) k;
+    insert into _results (test, expected, actual, pass)
+      values ('anon get_taken_slots columns', 'start_at', coalesce(tbl, 'no row'), tbl is not distinct from 'start_at');
+  exception when others then
+    insert into _results (test, expected, actual, pass)
+      values ('anon get_taken_slots columns', 'start_at', sqlstate, false);
   end;
   reset role;
 
@@ -295,6 +348,21 @@ begin
   exception when others then
     insert into _results (test, expected, actual, pass) values ('U books an appointment', '42501', sqlstate, sqlstate = '42501');
   end;
+  -- 0016: a signed-in buyer who is not a party still sees both taken slots
+  -- (seed at t + B's control booking at t + 1 day), though appointments_select
+  -- hides the rows themselves.
+  begin
+    select count(*) into n from public.get_taken_slots(sel);
+    insert into _results (test, expected, actual, pass) values ('U (non-party) get_taken_slots(A seller) count', '2', n::text, n = 2);
+  exception when others then
+    insert into _results (test, expected, actual, pass) values ('U (non-party) get_taken_slots(A seller) count', '2', sqlstate, false);
+  end;
+  begin
+    select count(*) into n from appointments where seller_id = sel;
+    insert into _results (test, expected, actual, pass) values ('U (non-party) appointment rows visible', '0', n::text, n = 0);
+  exception when others then
+    insert into _results (test, expected, actual, pass) values ('U (non-party) appointment rows visible', '0', sqlstate, false);
+  end;
   reset role;
 
   -- ---------------- unrelated signed-in user (no profile row) ----------------
@@ -336,6 +404,82 @@ begin
     insert into _results (test, expected, actual, pass) values ('admin sees test seller appointments', '2', sqlstate, false);
   end;
   reset role;
+
+  -- ---------------- 0016 get_taken_slots filters ----------------
+  -- Seeded here (as postgres), after every earlier count, so no earlier
+  -- expectation changes. Buyer U is not verified, but the insert policy
+  -- doesn't apply to postgres.
+  --   t + 4h  cancelled  (approved seller)  -> must NOT be returned
+  --   t + 5h  declined   (approved seller)  -> must NOT be returned
+  --   t + 6h  confirmed  (approved seller)  -> must be returned
+  --   t + 20d pending    (approved seller)  -> outside 15-day window, NOT returned
+  --   t - 4d  pending    (approved seller)  -> in the past, NOT returned
+  --   t       pending    (PENDING seller B) -> seller not approved, NOT returned
+  insert into appointments (seller_id, buyer_id, start_at, end_at, status) values
+    (sel,   u_uid, t + interval '4 hours',  t + interval '4 hours 30 minutes', 'cancelled'),
+    (sel,   u_uid, t + interval '5 hours',  t + interval '5 hours 30 minutes', 'declined'),
+    (sel,   u_uid, t + interval '6 hours',  t + interval '6 hours 30 minutes', 'confirmed'),
+    (sel,   u_uid, t + interval '20 days',  t + interval '20 days 30 minutes', 'pending'),
+    (sel,   u_uid, t - interval '4 days',   t - interval '4 days' + interval '30 minutes', 'pending'),
+    (sel_b, u_uid, t,                       t + interval '30 minutes',         'pending');
+
+  perform set_config('request.jwt.claims', '{"role":"anon"}', true);
+  set local role anon;
+  begin
+    select count(*) into n from public.get_taken_slots(sel) g
+      where g.start_at in (t + interval '4 hours', t + interval '5 hours');
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots excludes cancelled/declined', '0', n::text, n = 0);
+  exception when others then
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots excludes cancelled/declined', '0', sqlstate, false);
+  end;
+  begin
+    select count(*) into n from public.get_taken_slots(sel) g where g.start_at = t + interval '6 hours';
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots includes confirmed', '1', n::text, n = 1);
+  exception when others then
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots includes confirmed', '1', sqlstate, false);
+  end;
+  begin
+    select count(*) into n from public.get_taken_slots(sel) g
+      where g.start_at in (t + interval '20 days', t - interval '4 days');
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots excludes past/out-of-window', '0', n::text, n = 0);
+  exception when others then
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots excludes past/out-of-window', '0', sqlstate, false);
+  end;
+  begin
+    -- t, t + 1 day (B's control) and t + 6h (confirmed)
+    select count(*) into n from public.get_taken_slots(sel);
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots(approved seller) total', '3', n::text, n = 3);
+  exception when others then
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots(approved seller) total', '3', sqlstate, false);
+  end;
+  begin
+    select count(*) into n from public.get_taken_slots(sel_b);
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots(pending seller)', '0', n::text, n = 0);
+  exception when others then
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots(pending seller)', '0', sqlstate, false);
+  end;
+  begin
+    select count(*) into n from public.get_taken_slots(gen_random_uuid());
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots(unknown seller)', '0', n::text, n = 0);
+  exception when others then
+    insert into _results (test, expected, actual, pass) values ('anon get_taken_slots(unknown seller)', '0', sqlstate, false);
+  end;
+  reset role;
+
+  -- Function definition: security definer, search_path pinned to '', and
+  -- PUBLIC has no EXECUTE (only the explicit anon/authenticated/service_role
+  -- grants). Checked from the catalog, as postgres.
+  select p.prosecdef
+     and coalesce('search_path=""' = any(p.proconfig), false)
+     and not coalesce(exists (
+           select 1 from aclexplode(p.proacl) x where x.grantee = 0 and x.privilege_type = 'EXECUTE'
+         ), false)
+     and has_function_privilege('anon', p.oid, 'EXECUTE')
+    into b
+    from pg_proc p
+   where p.oid = 'public.get_taken_slots(uuid)'::regprocedure;
+  insert into _results (test, expected, actual, pass)
+    values ('get_taken_slots definer + search_path + grants', 'true', coalesce(b::text, 'null'), coalesce(b, false));
 
   -- ---------------- summary: always raise, so everything rolls back ----------------
   select count(*) filter (where _results.pass),

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { reviewSchema, reportSchema, bookAppointmentSchema } from "@/lib/validation";
+import { friendlyError } from "@/lib/errors";
 
 export async function submitReview(
   sellerId: string,
@@ -31,7 +32,7 @@ export async function submitReview(
   });
   if (error) {
     if (error.code === "23505") return { error: "You've already reviewed this seller." };
-    return { error: error.message };
+    return { error: friendlyError(error) };
   }
 
   revalidatePath(`/s/${slug}`);
@@ -50,7 +51,7 @@ export async function deleteOwnReview(reviewId: string, slug: string): Promise<{
     .delete()
     .eq("id", reviewId)
     .eq("author_id", user.id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath(`/s/${slug}`);
   return {};
@@ -76,7 +77,7 @@ export async function submitReport(
     reporter_id: user.id,
     reason: parsed.data.reason,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   return { success: true };
 }
@@ -117,7 +118,7 @@ export async function bookAppointment(
     if (error.code === "23505") {
       return { error: "That slot was just booked by someone else -- pick another." };
     }
-    return { error: error.message };
+    return { error: friendlyError(error) };
   }
 
   revalidatePath(`/s/${slug}`);

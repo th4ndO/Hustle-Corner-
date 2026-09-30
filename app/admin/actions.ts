@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { friendlyError } from "@/lib/errors";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -22,7 +23,7 @@ export async function setSellerStatus(
   if (!ok) return { error: "Admins only." };
 
   const { error } = await supabase.from("sellers").update({ status }).eq("id", sellerId);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/admin");
   return {};
@@ -39,7 +40,7 @@ export async function setSellerMicrosite(
     .from("sellers")
     .update({ has_microsite: hasMicrosite })
     .eq("id", sellerId);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/admin");
   return {};
@@ -50,7 +51,7 @@ export async function resolveReport(reportId: string): Promise<{ error?: string 
   if (!ok) return { error: "Admins only." };
 
   const { error } = await supabase.from("reports").update({ status: "resolved" }).eq("id", reportId);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/admin");
   return {};
@@ -61,7 +62,7 @@ export async function setReviewHidden(reviewId: string, isHidden: boolean): Prom
   if (!ok) return { error: "Admins only." };
 
   const { error } = await supabase.from("reviews").update({ is_hidden: isHidden }).eq("id", reviewId);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/admin");
   return {};
@@ -72,7 +73,7 @@ export async function deleteReview(reviewId: string): Promise<{ error?: string }
   if (!ok) return { error: "Admins only." };
 
   const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
 
   revalidatePath("/admin");
   return {};
