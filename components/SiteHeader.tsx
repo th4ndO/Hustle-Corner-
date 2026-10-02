@@ -3,6 +3,7 @@ import { APP_NAME } from "@/config";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import BrandMark from "@/components/BrandMark";
+import MobileMenu from "@/components/MobileMenu";
 
 export default async function SiteHeader() {
   const supabase = await createClient();
@@ -15,6 +16,19 @@ export default async function SiteHeader() {
     const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
     isAdmin = data?.role === "admin";
   }
+
+  const menuLinks = user
+    ? [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/bookings", label: "Bookings" },
+        ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+        { href: "/how-it-works", label: "How it works" },
+      ]
+    : [
+        { href: "/how-it-works", label: "How it works" },
+        { href: "/dashboard/become-seller", label: "List your business" },
+        { href: "/login", label: "Log in or sign up" },
+      ];
 
   return (
     <header className="sticky top-0 z-10 border-b border-brand-700 bg-brand-600">
@@ -36,9 +50,18 @@ export default async function SiteHeader() {
             className="h-10 w-full rounded-full border border-brand-500 bg-white px-4 text-sm text-gray-900 placeholder:text-gray-500 focus:border-white focus-visible:outline-brand-500"
           />
         </form>
-        {/* Account links stay together, so on phones they wrap onto one row
-            of their own instead of splitting across two. */}
-        <div className="flex shrink-0 items-center gap-x-3">
+        {/* Phones: a visible "Log in" for visitors, and the burger menu. */}
+        {!user && (
+          <Link
+            href="/login"
+            className="flex shrink-0 items-center py-2 text-sm font-medium text-white focus-visible:outline-white sm:hidden"
+          >
+            Log in
+          </Link>
+        )}
+        <MobileMenu links={menuLinks} loggedIn={!!user} />
+        {/* From sm up the account links sit inline in the header. */}
+        <div className="hidden shrink-0 items-center gap-x-3 sm:flex">
           {user && (
             <Link
               href="/dashboard"
