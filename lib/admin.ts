@@ -9,6 +9,9 @@ export type AdminSeller = {
   hasMicrosite: boolean;
   // Shown so moderators can check what "Other" means before approving.
   otherCategory: string | null;
+  // Set when the seller changed public text, services, photos or categories
+  // after approval (migration 0020); cleared by "Mark reviewed".
+  editedSinceReviewAt: string | null;
 };
 
 export type AdminReport = {
@@ -47,7 +50,7 @@ export async function getAllSellersForAdmin(): Promise<AdminSeller[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("sellers")
-    .select("id, business_name, slug, status, created_at, has_microsite, other_category")
+    .select("id, business_name, slug, status, created_at, has_microsite, other_category, edited_since_review_at")
     .order("status", { ascending: true })
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -60,6 +63,7 @@ export async function getAllSellersForAdmin(): Promise<AdminSeller[]> {
     createdAt: s.created_at,
     hasMicrosite: s.has_microsite,
     otherCategory: s.other_category,
+    editedSinceReviewAt: s.edited_since_review_at,
   }));
 }
 

@@ -293,54 +293,14 @@ export async function updateSellerCategories(formData: FormData): Promise<{ erro
   );
   if ("error" in check) return { error: check.error };
 
-  const { data: categories } = await supabase.from("categories").select("id, slug").in("slug", check.slugs);
-  if (!categories || categories.length !== check.slugs.length) {
-    return { error: "One of the selected categories is invalid." };
-  }
-  const wanted = new Set(categories.map((c) => c.id));
+  // One transaction in the database (migration 0020): the new links, the
+  // removed links and the "Other" description change together or not at all.
+  const { error } = await supabase.rpc("set_seller_categories", {
+    p_slugs: check.slugs,
+    p_other_category: check.otherCategory,
+  });
+  if (error) return { error: friendlyError(error) };
 
-  const { data: current, error: currentError } = await supabase
-    .from("seller_categories")
-    .select("category_id")
-    .eq("seller_id", seller.id);
-  if (currentError) return { error: friendlyError(currentError) };
-  const have = new Set((current ?? []).map((r) => r.category_id as string));
-
-  // Only active categories are shown in the picker (RLS hides inactive ones
-  // from sellers), so only those can be removed here; a link to a category
-  // that was later switched off is left alone.
-  const { data: visible, error: visibleError } = await supabase.from("categories").select("id").in("id", [...have]);
-  if (visibleError) return { error: friendlyError(visibleError) };
-  const removable = new Set((visible ?? []).map((c) => c.id as string));
-
-  const toAdd = [...wanted].filter((id) => !have.has(id));
-  const toRemove = [...have].filter((id) => !wanted.has(id) && removable.has(id));
-
-  if (toAdd.length > 0) {
-    const { error } = await supabase
-      .from("seller_categories")
-      .insert(toAdd.map((category_id) => ({ seller_id: seller.id, category_id })));
-    if (error) return { error: friendlyError(error) };
-  }
-
-  const { error: otherError } = await supabase
-    .from("sellers")
-    .update({ other_category: check.otherCategory })
-    .eq("id", seller.id);
-  if (otherError) return { error: friendlyError(otherError) };
-
-  if (toRemove.length > 0) {
-    const { error } = await supabase
-      .from("seller_categories")
-      .delete()
-      .eq("seller_id", seller.id)
-      .in("category_id", toRemove);
-    if (error) return { error: friendlyError(error) };
-  }
-
-  // Every page is rendered per request, so only the dashboard (the page the
-  // form is on) needs refreshing; revalidating the whole layout here left the
-  // form stuck on "Saving…".
   revalidatePath("/dashboard");
   return { saved: true };
 }
