@@ -27,7 +27,7 @@ Checked 2026-09-30 against production's history (read-only).
 | `0014_restore_anon_review_author_names.sql` | `20260925175700` `0014_restore_anon_review_author_names` | |
 | `0015_fix_is_admin_recursion.sql` | *no history row* | Applied 2026-10-02 by the owner in the SQL editor (see PR #2), which doesn't add a history row. Verified live: both helpers are SECURITY DEFINER with `search_path = ''`. |
 | `0016_public_taken_slots.sql` | *no history row* | Applied with 0015, same way. Verified live: `get_taken_slots` exists. |
-| `0017_more_categories.sql` | *not applied yet* | Data only: seeds 32 categories (upsert by slug). Apply with `apply_migration` named `0017_more_categories` so the history gets a row. |
+| `0017_more_categories.sql` | `0017_more_categories` (applied 2026-10-02 via `apply_migration`) | Data only: 32 categories, upsert by slug. Verified: 32 active rows, history row present. |
 
 "Covers both" above is from reading the repo files and the production step
 names; the production step bodies themselves weren't diffed.
