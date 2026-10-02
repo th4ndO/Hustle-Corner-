@@ -309,7 +309,8 @@ export async function updateSellerCategories(formData: FormData): Promise<{ erro
   // Only active categories are shown in the picker (RLS hides inactive ones
   // from sellers), so only those can be removed here; a link to a category
   // that was later switched off is left alone.
-  const { data: visible } = await supabase.from("categories").select("id").in("id", [...have]);
+  const { data: visible, error: visibleError } = await supabase.from("categories").select("id").in("id", [...have]);
+  if (visibleError) return { error: friendlyError(visibleError) };
   const removable = new Set((visible ?? []).map((c) => c.id as string));
 
   const toAdd = [...wanted].filter((id) => !have.has(id));
