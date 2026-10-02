@@ -52,6 +52,9 @@ export default async function AdminPage() {
                 >
                   {s.status}
                 </span>
+                {s.otherCategory && (
+                  <p className="mt-0.5 text-xs text-gray-600">Other: {s.otherCategory}</p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <SellerMicrositeToggle sellerId={s.id} hasMicrosite={s.hasMicrosite} />

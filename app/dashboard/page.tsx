@@ -2,12 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getSellerByOwner, getPhotoUrl } from "@/lib/sellers";
+import { getSellerByOwner, getPhotoUrl, getActiveCategories } from "@/lib/sellers";
 import { getSellerStats } from "@/lib/stats";
 import { getSellerAvailabilityRules } from "@/lib/availability";
 import { getSellerAppointments } from "@/lib/appointments";
 import { LIMITS } from "@/config";
 import EditBasicInfoForm from "@/components/EditBasicInfoForm";
+import EditCategoriesForm from "@/components/EditCategoriesForm";
 import AddServiceForm from "@/components/AddServiceForm";
 import DeleteServiceButton from "@/components/DeleteServiceButton";
 import DeletePhotoButton from "@/components/DeletePhotoButton";
@@ -39,6 +40,7 @@ export default async function DashboardPage() {
   const stats = seller ? await getSellerStats(seller.id) : null;
   const availabilityRules = seller ? await getSellerAvailabilityRules(seller.id) : [];
   const appointments = seller ? await getSellerAppointments(seller.id) : [];
+  const allCategories = seller ? await getActiveCategories() : [];
 
   if (!seller) {
     return (
@@ -112,6 +114,17 @@ export default async function DashboardPage() {
           Profile
         </h2>
         <EditBasicInfoForm seller={seller} />
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          Categories
+        </h2>
+        <EditCategoriesForm
+          categories={allCategories}
+          initialSlugs={seller.categories.map((c) => c.slug).filter((slug) => allCategories.some((c) => c.slug === slug))}
+          initialOther={seller.otherCategory ?? ""}
+        />
       </section>
 
       {seller.hasMicrosite && (

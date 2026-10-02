@@ -4,6 +4,9 @@ export type CategoryTag = { name: string; slug: string };
 
 export type SellerCard = {
   id: string;
+  // What "Other" means for this seller ("Car washing"); null unless Other
+  // is one of their categories.
+  otherCategory: string | null;
   slug: string;
   businessName: string;
   bio: string | null;
@@ -30,7 +33,7 @@ export type SellerDetail = SellerCard & {
 };
 
 const SELLER_CARD_SELECT = `
-  id, slug, business_name, bio, area_note, avg_rating, review_count,
+  id, slug, business_name, bio, area_note, avg_rating, review_count, other_category,
   services(id, name, price_from, price_to, duration_minutes, is_active),
   seller_categories(categories(name, slug)),
   seller_photos(id, storage_path, sort_order)
@@ -44,6 +47,7 @@ type SellerRow = {
   area_note: string | null;
   avg_rating: number;
   review_count: number;
+  other_category: string | null;
   services:
     | { id: string; name: string; price_from: number; price_to: number | null; duration_minutes: number | null; is_active: boolean }[]
     | null;
@@ -68,9 +72,13 @@ function mapSellerCard(row: SellerRow): SellerCard {
     avgRating: Number(row.avg_rating),
     reviewCount: row.review_count,
     minPrice: activePrices.length ? Math.min(...activePrices) : null,
+    otherCategory: row.other_category,
+    // "Other" shows as what the seller said it is; the slug still links to
+    // the Other category page.
     categories: (row.seller_categories ?? [])
       .map((sc) => sc.categories)
-      .filter((c): c is CategoryTag => c !== null),
+      .filter((c): c is CategoryTag => c !== null)
+      .map((c) => (c.slug === "other" && row.other_category ? { ...c, name: row.other_category } : c)),
     photoPath: photos[0]?.storage_path ?? null,
   };
 }
@@ -158,14 +166,16 @@ export async function getSellersByCategory(
 
 export async function searchSellers(query: string): Promise<SellerCard[]> {
   const supabase = await createClient();
-  const q = query.trim();
+  // Commas, brackets and backslashes are filter syntax in PostgREST's or();
+  // % and _ are LIKE wildcards. Drop them so a search can't change the query.
+  const q = query.replace(/[,()\\%_*"]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100);
   if (!q) return [];
 
   const { data, error } = await supabase
     .from("sellers")
     .select(SELLER_CARD_SELECT)
     .eq("status", "approved")
-    .or(`business_name.ilike.%${q}%,bio.ilike.%${q}%`);
+    .or(`business_name.ilike.%${q}%,bio.ilike.%${q}%,other_category.ilike.%${q}%`);
   if (error) throw error;
 
   const nameMatches = (data as unknown as SellerRow[]).map(mapSellerCard);

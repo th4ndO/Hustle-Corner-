@@ -8,7 +8,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: APP_NAME,
   description:
-    "Find trusted student services on your campus — with real reviews from real students.",
+    "Find reliable student-owned businesses near campus, with real reviews from real students.",
 };
 
 // Self-hosted at build time: no request to Google from the visitor, and

@@ -10,6 +10,7 @@ import { validateJpegUpload } from "@/lib/imageValidation";
 import { LIMITS } from "@/config";
 import { friendlyError } from "@/lib/errors";
 import { checkDisplayName } from "@/lib/displayName";
+import { checkCategorySelection } from "@/lib/categorySelection";
 
 async function requireOwnSeller() {
   const supabase = await createClient();
@@ -276,5 +277,70 @@ export async function updateDisplayName(formData: FormData): Promise<{ error?: s
   if (error) return { error: friendlyError(error) };
 
   revalidatePath("/", "layout");
+  return { saved: true };
+}
+
+// Change a seller's categories after onboarding. New links are added before
+// old ones are removed, so a listing is never left with no category, and
+// the "Other" description is stored only while Other is picked.
+export async function updateSellerCategories(formData: FormData): Promise<{ error?: string; saved?: boolean }> {
+  const { supabase, user, seller } = await requireOwnSeller();
+  if (!user || !seller) return { error: "No seller profile found." };
+
+  const check = checkCategorySelection(
+    formData.getAll("categorySlugs").map(String),
+    String(formData.get("otherCategory") ?? ""),
+  );
+  if ("error" in check) return { error: check.error };
+
+  const { data: categories } = await supabase.from("categories").select("id, slug").in("slug", check.slugs);
+  if (!categories || categories.length !== check.slugs.length) {
+    return { error: "One of the selected categories is invalid." };
+  }
+  const wanted = new Set(categories.map((c) => c.id));
+
+  const { data: current, error: currentError } = await supabase
+    .from("seller_categories")
+    .select("category_id")
+    .eq("seller_id", seller.id);
+  if (currentError) return { error: friendlyError(currentError) };
+  const have = new Set((current ?? []).map((r) => r.category_id as string));
+
+  // Only active categories are shown in the picker (RLS hides inactive ones
+  // from sellers), so only those can be removed here; a link to a category
+  // that was later switched off is left alone.
+  const { data: visible, error: visibleError } = await supabase.from("categories").select("id").in("id", [...have]);
+  if (visibleError) return { error: friendlyError(visibleError) };
+  const removable = new Set((visible ?? []).map((c) => c.id as string));
+
+  const toAdd = [...wanted].filter((id) => !have.has(id));
+  const toRemove = [...have].filter((id) => !wanted.has(id) && removable.has(id));
+
+  if (toAdd.length > 0) {
+    const { error } = await supabase
+      .from("seller_categories")
+      .insert(toAdd.map((category_id) => ({ seller_id: seller.id, category_id })));
+    if (error) return { error: friendlyError(error) };
+  }
+
+  const { error: otherError } = await supabase
+    .from("sellers")
+    .update({ other_category: check.otherCategory })
+    .eq("id", seller.id);
+  if (otherError) return { error: friendlyError(otherError) };
+
+  if (toRemove.length > 0) {
+    const { error } = await supabase
+      .from("seller_categories")
+      .delete()
+      .eq("seller_id", seller.id)
+      .in("category_id", toRemove);
+    if (error) return { error: friendlyError(error) };
+  }
+
+  // Every page is rendered per request, so only the dashboard (the page the
+  // form is on) needs refreshing; revalidating the whole layout here left the
+  // form stuck on "Saving…".
+  revalidatePath("/dashboard");
   return { saved: true };
 }

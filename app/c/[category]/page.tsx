@@ -120,7 +120,7 @@ export default async function CategoryPage({
           body={
             filtered
               ? "Try a wider price range or a lower rating."
-              : "New student businesses are joining. Check back soon, or look in another category."
+              : "New student-owned businesses are joining. Check back soon, or look in another category."
           }
           action={
             filtered
