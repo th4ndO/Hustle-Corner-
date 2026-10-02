@@ -2,6 +2,7 @@ import Link from "next/link";
 import { APP_NAME } from "@/config";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
+import BrandMark from "@/components/BrandMark";
 
 export default async function SiteHeader() {
   const supabase = await createClient();
@@ -20,8 +21,9 @@ export default async function SiteHeader() {
       <div className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-3 px-4 py-2">
         <Link
           href="/"
-          className="mr-auto flex shrink-0 items-center py-2 text-base font-bold sm:text-lg text-white focus-visible:outline-white sm:mr-0"
+          className="mr-auto flex shrink-0 items-center gap-2 py-2 text-base font-bold sm:text-lg text-white focus-visible:outline-white sm:mr-0"
         >
+          <BrandMark variant="reversed" className="h-7 w-7 shrink-0" />
           {APP_NAME}
         </Link>
         {/* Phones: search drops to its own full-width row under the name + nav
