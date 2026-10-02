@@ -27,7 +27,7 @@ export default async function BookingsPage() {
       ) : (
         <p className="text-gray-500">
           No bookings yet.{" "}
-          <Link href="/" className="font-medium text-brand-600">
+          <Link href="/" className="text-link">
             Browse sellers
           </Link>{" "}
           to request an appointment.

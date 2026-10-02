@@ -21,7 +21,7 @@ export default function EditBasicInfoForm({ seller }: { seller: SellerDetail }) 
           name="businessName"
           defaultValue={seller.businessName}
           placeholder="Business name"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          className="w-full rounded-lg border border-field px-3 py-2"
         />
       </div>
       <div>
@@ -34,7 +34,7 @@ export default function EditBasicInfoForm({ seller }: { seller: SellerDetail }) 
           defaultValue={seller.bio ?? ""}
           placeholder="Bio"
           rows={3}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          className="w-full rounded-lg border border-field px-3 py-2"
         />
       </div>
       <div>
@@ -46,7 +46,7 @@ export default function EditBasicInfoForm({ seller }: { seller: SellerDetail }) 
           name="areaNote"
           defaultValue={seller.areaNote ?? ""}
           placeholder="Area"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          className="w-full rounded-lg border border-field px-3 py-2"
         />
       </div>
       <div>
@@ -58,7 +58,7 @@ export default function EditBasicInfoForm({ seller }: { seller: SellerDetail }) 
           name="instagramHandle"
           defaultValue={seller.instagramHandle ?? ""}
           placeholder="Instagram handle"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          className="w-full rounded-lg border border-field px-3 py-2"
         />
       </div>
       <div>
@@ -70,7 +70,7 @@ export default function EditBasicInfoForm({ seller }: { seller: SellerDetail }) 
           name="whatsappNumber"
           defaultValue={seller.whatsappNumber}
           placeholder="WhatsApp number"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          className="w-full rounded-lg border border-field px-3 py-2"
         />
       </div>
       {state.error && <p className="text-sm text-red-600">{state.error}</p>}

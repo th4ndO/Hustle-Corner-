@@ -17,7 +17,7 @@ export default function MicrositeForm({ seller }: { seller: SellerDetail }) {
         defaultValue={seller.micrositeTagline ?? ""}
         placeholder="Tagline, e.g. Braids done right, every time"
         maxLength={80}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+        className="w-full rounded-lg border border-field px-3 py-2"
       />
       <label className="flex items-center gap-2 text-sm text-gray-600">
         Accent color
@@ -34,7 +34,7 @@ export default function MicrositeForm({ seller }: { seller: SellerDetail }) {
         placeholder="Your story — how you started, what makes you different (max 1000 characters)"
         rows={5}
         maxLength={1000}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+        className="w-full rounded-lg border border-field px-3 py-2"
       />
       {state.error && <p className="text-sm text-red-600">{state.error}</p>}
       <button

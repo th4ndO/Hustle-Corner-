@@ -251,7 +251,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               onChange={(e) => setBusinessName(e.target.value.slice(0, BUSINESS_NAME_MAX))}
               placeholder="e.g. Campus Curls"
               maxLength={BUSINESS_NAME_MAX}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className="w-full rounded-lg border border-field px-4 py-3"
             />
             <p className="mt-1 text-right text-xs text-gray-400">
               {businessName.length}/{BUSINESS_NAME_MAX}
@@ -269,7 +269,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               placeholder="What you do and what makes it good"
               rows={4}
               maxLength={LIMITS.bioMaxChars}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className="w-full rounded-lg border border-field px-4 py-3"
             />
             <p className="mt-1 text-right text-xs text-gray-400">
               {bio.length}/{LIMITS.bioMaxChars}
@@ -286,7 +286,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               onChange={(e) => setAreaNote(e.target.value.slice(0, AREA_NOTE_MAX))}
               placeholder="e.g. Hatfield, near Hillcrest"
               maxLength={AREA_NOTE_MAX}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className="w-full rounded-lg border border-field px-4 py-3"
             />
           </div>
 
@@ -300,7 +300,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               onChange={(e) => setInstagramHandle(e.target.value.slice(0, INSTAGRAM_HANDLE_MAX))}
               placeholder="@yourhandle"
               maxLength={INSTAGRAM_HANDLE_MAX}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className="w-full rounded-lg border border-field px-4 py-3"
             />
           </div>
 
@@ -352,7 +352,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
                 value={s.name}
                 onChange={(e) => updateService(i, { name: e.target.value })}
                 placeholder="Service name, e.g. Box braids"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                className="w-full rounded-lg border border-field px-3 py-2"
               />
               <div className="flex gap-2">
                 <div className="w-1/2">
@@ -362,7 +362,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
                     value={s.priceFrom}
                     onChange={(e) => updateService(i, { priceFrom: e.target.value })}
                     placeholder="e.g. 250"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                    className="w-full rounded-lg border border-field px-3 py-2"
                   />
                 </div>
                 <div className="w-1/2">
@@ -372,7 +372,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
                     value={s.priceTo}
                     onChange={(e) => updateService(i, { priceTo: e.target.value })}
                     placeholder="e.g. 400"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                    className="w-full rounded-lg border border-field px-3 py-2"
                   />
                 </div>
               </div>
@@ -383,7 +383,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
                   value={s.durationMinutes}
                   onChange={(e) => updateService(i, { durationMinutes: e.target.value })}
                   placeholder="e.g. 120"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                  className="w-full rounded-lg border border-field px-3 py-2"
                 />
               </div>
             </div>
@@ -447,7 +447,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               value={whatsappNumber}
               onChange={(e) => setWhatsappNumber(e.target.value)}
               placeholder="082 123 4567"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className="w-full rounded-lg border border-field px-4 py-3"
             />
           </div>
           <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 text-sm text-gray-600">

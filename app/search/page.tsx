@@ -1,4 +1,4 @@
-import Link from "next/link";
+import EmptyState from "@/components/EmptyState";
 import { searchSellers } from "@/lib/sellers";
 import SellerCard from "@/components/SellerCard";
 
@@ -19,13 +19,12 @@ export default async function SearchPage({
       {!q && <p className="text-gray-500">Type something in the search bar above.</p>}
 
       {q && sellers.length === 0 && (
-        <p className="text-gray-500">
-          No sellers found for &quot;{q}&quot;. Try a different search, or{" "}
-          <Link href="/" className="font-medium text-brand-600">
-            browse all categories
-          </Link>
-          .
-        </p>
+        <EmptyState
+          icon="search"
+          title={`No results for "${q}"`}
+          body="Try a shorter word, like “braids” or “nails”, or browse by category."
+          action={{ href: "/#browse", label: "Browse categories" }}
+        />
       )}
 
       {sellers.length > 0 && (

@@ -8,7 +8,7 @@ export default function AuthCodeErrorPage() {
         That link didn&apos;t work — it may have expired or already been
         used.
       </p>
-      <Link href="/login" className="mt-6 inline-block font-medium text-brand-600">
+      <Link href="/login" className="text-link mt-6 inline-block">
         Try logging in again
       </Link>
     </main>
