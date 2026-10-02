@@ -41,11 +41,12 @@ export default async function HomePage() {
       {/* Hero: one headline, one line, one main action. */}
       <section className="pb-10 pt-10 text-center sm:pt-14">
         <h1 className="text-4xl font-extrabold leading-[1.05] text-brand-600 sm:text-5xl">
-          Find student hustles near campus
+          Trusted student-owned businesses near campus
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-gray-600">
-          Real students at {CAMPUS_NAME} offering real services. Message them
-          directly on WhatsApp, no app, no middleman.
+          The easy way to find reliable student-owned businesses at {CAMPUS_NAME}.
+          Every listing is checked before it goes live, and reviews come from
+          real students. Message them directly on WhatsApp, no app, no middleman.
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
@@ -110,7 +111,7 @@ export default async function HomePage() {
           <EmptyState
             icon="sparkles"
             title="No sellers yet"
-            body="The first student businesses are signing up now. Got a hustle? Be one of the first."
+            body="The first student-owned businesses are signing up now. Own a business? List it free and be one of the first."
             action={{ href: "/how-it-works?for=business", label: "List your business" }}
           />
         )}

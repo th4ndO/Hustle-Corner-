@@ -15,7 +15,7 @@ export default function TermsPage() {
           <h2 className="mb-3 text-lg font-semibold text-gray-900">What {APP_NAME} is</h2>
           <p className="leading-relaxed">
             {APP_NAME} is a directory that helps students at the University
-            of Pretoria (Hatfield) find and list side-hustle services. We
+            of Pretoria (Hatfield) find and list student-owned businesses. We
             don&apos;t process payments or act as a party to any transaction
             between a buyer and a seller — the actual service, and any
             money that changes hands for it, is arranged directly between

@@ -5,10 +5,8 @@ import { compressImage } from "@/lib/imageCompression";
 import { onboardSeller } from "@/app/dashboard/become-seller/actions";
 import { APP_NAME, LIMITS } from "@/config";
 import type { CategoryTag } from "@/lib/sellers";
-import { categoryIcon, groupCategories } from "@/lib/categoryCatalog";
-import Icon from "@/components/Icon";
-
-const MAX_CATEGORIES = LIMITS.maxCategories;
+import { checkCategorySelection } from "@/lib/categorySelection";
+import CategoryPicker from "@/components/CategoryPicker";
 
 type ServiceRow = { name: string; priceFrom: string; priceTo: string; durationMinutes: string };
 type Photo = { blob: Blob; previewUrl: string };
@@ -32,6 +30,7 @@ type Draft = {
   areaNote: string;
   instagramHandle: string;
   selectedCategories: string[];
+  otherCategory?: string;
   services: ServiceRow[];
   whatsappNumber: string;
   consent: boolean;
@@ -70,6 +69,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
   const [areaNote, setAreaNote] = useState("");
   const [instagramHandle, setInstagramHandle] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [otherCategory, setOtherCategory] = useState("");
   const [services, setServices] = useState<ServiceRow[]>([emptyService()]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [compressing, setCompressing] = useState(false);
@@ -89,6 +89,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
     setAreaNote(draft.areaNote ?? "");
     setInstagramHandle(draft.instagramHandle ?? "");
     setSelectedCategories(draft.selectedCategories ?? []);
+    setOtherCategory(draft.otherCategory ?? "");
     setServices(draft.services?.length ? draft.services : [emptyService()]);
     setWhatsappNumber(draft.whatsappNumber ?? "");
     setConsent(draft.consent ?? false);
@@ -104,14 +105,17 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
       areaNote,
       instagramHandle,
       selectedCategories,
+      otherCategory,
       services,
       whatsappNumber,
       consent,
     });
-  }, [step, businessName, bio, areaNote, instagramHandle, selectedCategories, services, whatsappNumber, consent]);
+  }, [step, businessName, bio, areaNote, instagramHandle, selectedCategories, otherCategory, services, whatsappNumber, consent]);
+
+  const categoryCheck = checkCategorySelection(selectedCategories, otherCategory);
 
   const stepValid = [
-    businessName.trim().length >= 2 && selectedCategories.length >= 1,
+    businessName.trim().length >= 2 && !("error" in categoryCheck),
     services.length >= 1 && services.every((s) => s.name.trim() && s.priceFrom),
     photos.length >= LIMITS.minPhotosToOnboard,
     whatsappNumber.trim().length > 0 && consent,
@@ -121,7 +125,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
     switch (step) {
       case 1:
         if (businessName.trim().length < 2) return "Enter a business name (at least 2 characters).";
-        if (selectedCategories.length < 1) return "Pick at least one category.";
+        if ("error" in categoryCheck) return categoryCheck.error;
         return null;
       case 2:
         if (!services.every((s) => s.name.trim() && s.priceFrom)) {
@@ -200,6 +204,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
     fd.append("instagramHandle", instagramHandle);
     fd.append("whatsappNumber", whatsappNumber);
     selectedCategories.forEach((slug) => fd.append("categorySlugs", slug));
+    fd.append("otherCategory", otherCategory);
     fd.append(
       "servicesJson",
       JSON.stringify(
@@ -308,53 +313,15 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
             />
           </div>
 
-          <fieldset className="border-t border-gray-200 pt-5">
-            <legend className="text-sm font-medium text-gray-700">What do you offer?</legend>
-            <p className="mb-3 mt-1 text-xs text-gray-500">
-              Pick up to {MAX_CATEGORIES}. Not listed? Choose <strong>Other</strong> and describe it in your bio.
-            </p>
-            <div className="space-y-4">
-              {groupCategories(categories).map((group) => (
-                <div key={group.name}>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{group.name}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {group.categories.map((c) => {
-                      const checked = selectedCategories.includes(c.slug);
-                      const full = !checked && selectedCategories.length >= MAX_CATEGORIES;
-                      return (
-                        <label
-                          key={c.slug}
-                          className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-2 text-sm transition has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-500 ${
-                            checked
-                              ? "border-brand-600 bg-brand-600 font-medium text-white"
-                              : full
-                                ? "cursor-not-allowed border-gray-200 text-gray-400"
-                                : "border-field text-gray-800 hover:border-brand-600"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={checked}
-                            disabled={full}
-                            onChange={() => toggleCategory(c.slug)}
-                          />
-                          <Icon name={categoryIcon(c.slug)} className="h-4 w-4" />
-                          {c.name}
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-            {selectedCategories.includes("other") && (
-              <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                Say exactly what you offer in your bio. Not allowed: writing assignments or essays for others,
-                loans, alcohol, lifts for money, or reselling phones and laptops.
-              </p>
-            )}
-          </fieldset>
+          <div className="border-t border-gray-200 pt-5">
+            <CategoryPicker
+              categories={categories}
+              selected={selectedCategories}
+              onToggle={toggleCategory}
+              otherCategory={otherCategory}
+              onOtherCategoryChange={setOtherCategory}
+            />
+          </div>
         </div>
       )}
 

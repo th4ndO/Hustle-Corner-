@@ -12,7 +12,7 @@ export default async function CategoriesPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16 pt-6">
       <h1 className="text-3xl font-extrabold text-brand-600">All categories</h1>
-      <p className="mt-2 text-gray-600">Everything students offer near campus, from braids to laptop repairs.</p>
+      <p className="mt-2 text-gray-600">Every kind of student-owned business near campus, from braids to laptop repairs.</p>
 
       <div className="mt-8 space-y-8">
         {groups.map((group) => (

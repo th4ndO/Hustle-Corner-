@@ -8,6 +8,7 @@ import { validateJpegUpload } from "@/lib/imageValidation";
 import { CAMPUS_SLUG, LIMITS } from "@/config";
 import { z } from "zod";
 import { friendlyError } from "@/lib/errors";
+import { checkCategorySelection } from "@/lib/categorySelection";
 
 export async function onboardSeller(formData: FormData): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -50,6 +51,12 @@ export async function onboardSeller(formData: FormData): Promise<{ error?: strin
   }
   const input = parsed.data;
 
+  const categoryCheck = checkCategorySelection(
+    input.categorySlugs,
+    String(formData.get("otherCategory") ?? ""),
+  );
+  if ("error" in categoryCheck) return { error: categoryCheck.error };
+
   const photoFiles = formData
     .getAll("photos")
     .filter((p): p is File => p instanceof File && p.size > 0)
@@ -72,8 +79,8 @@ export async function onboardSeller(formData: FormData): Promise<{ error?: strin
   const { data: categories } = await supabase
     .from("categories")
     .select("id, slug")
-    .in("slug", input.categorySlugs);
-  if (!categories || categories.length !== input.categorySlugs.length) {
+    .in("slug", categoryCheck.slugs);
+  if (!categories || categories.length !== categoryCheck.slugs.length) {
     return { error: "One of the selected categories is invalid." };
   }
 
@@ -96,6 +103,7 @@ export async function onboardSeller(formData: FormData): Promise<{ error?: strin
       area_note: input.areaNote || null,
       instagram_handle: input.instagramHandle || null,
       whatsapp_number: whatsappNumber,
+      other_category: categoryCheck.otherCategory,
       status: "pending",
     })
     .select("id")

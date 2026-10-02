@@ -4,7 +4,7 @@ import type { CategoryTag } from "@/lib/sellers";
 // The categories students can list under, grouped for browsing. Names and
 // slugs here must match the rows in the `categories` table (migration 0017
 // seeds them); this file only adds the group, the icon and "popular".
-// Researched 2026-10 from SA campus side-hustle coverage: beauty, food,
+// Researched 2026-10 from coverage of SA students' campus businesses: beauty, food,
 // tutoring/printing, creative work, thrift, tech repair and errands.
 //
 // Deliberately NOT categories (and not allowed under "Other"): assignment or
