@@ -338,6 +338,9 @@ export async function updateSellerCategories(formData: FormData): Promise<{ erro
     if (error) return { error: friendlyError(error) };
   }
 
-  revalidatePath("/", "layout");
+  // Every page is rendered per request, so only the dashboard (the page the
+  // form is on) needs refreshing; revalidating the whole layout here left the
+  // form stuck on "Saving…".
+  revalidatePath("/dashboard");
   return { saved: true };
 }
