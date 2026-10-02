@@ -25,8 +25,8 @@ Checked 2026-09-30 against production's history (read-only).
 | `0012_appointments.sql` | `20260925163225` `0012_appointments` | |
 | `0013_fix_advisor_findings.sql` | `20260925163314` `0013_fix_advisor_findings` | |
 | `0014_restore_anon_review_author_names.sql` | `20260925175700` `0014_restore_anon_review_author_names` | |
-| `0015_fix_is_admin_recursion.sql` | *not applied yet* | Owner runs it in the SQL editor (see PR #2). The SQL editor doesn't add a history row. |
-| `0016_public_taken_slots.sql` | *not applied yet* | Same as 0015. |
+| `0015_fix_is_admin_recursion.sql` | *no history row* | Applied 2026-10-02 by the owner in the SQL editor (see PR #2), which doesn't add a history row. Verified live: both helpers are SECURITY DEFINER with `search_path = ''`. |
+| `0016_public_taken_slots.sql` | *no history row* | Applied with 0015, same way. Verified live: `get_taken_slots` exists. |
 
 "Covers both" above is from reading the repo files and the production step
 names; the production step bodies themselves weren't diffed.
