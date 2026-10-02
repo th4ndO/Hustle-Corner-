@@ -7,12 +7,19 @@ body {
 }
 
 @layer base {
+  /* "Browse services" jumps smoothly to the categories (disabled below for
+     people who ask for reduced motion). */
+  html {
+    scroll-behavior: smooth;
+  }
+
   /* Visible keyboard focus on every interactive element, site-wide, without
      having to remember to add it per component. :focus-visible (not :focus)
      so mouse/touch clicks don't show a ring, only keyboard navigation. */
   a:focus-visible,
   button:focus-visible,
   input:focus-visible,
+  select:focus-visible,
   textarea:focus-visible {
     @apply outline outline-2 outline-offset-2 outline-brand-500;
   }
@@ -21,5 +28,31 @@ body {
      buttons implicitly -- they don't receive :active. */
   button {
     @apply transition-transform active:scale-95;
+  }
+
+  /* Page titles use the brand display face; body text stays on the fast
+     system stack. */
+  h1 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer components {
+  /* Links inside running text: underlined so they don't read as plain text
+     (brand-600 navy is close to the body ink). */
+  .text-link {
+    @apply font-medium text-brand-600 underline decoration-gray-400 decoration-2 underline-offset-4 transition-colors hover:decoration-brand-600;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }

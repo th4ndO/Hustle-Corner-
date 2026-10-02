@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSellersByCategory, getActiveCategories, type CategorySort } from "@/lib/sellers";
 import SellerCard from "@/components/SellerCard";
+import EmptyState from "@/components/EmptyState";
+import { categoryIcon } from "@/lib/categoryIcon";
 import { APP_NAME, CAMPUS_NAME } from "@/config";
 
 const SORT_OPTIONS: { value: CategorySort; label: string }[] = [
@@ -49,30 +50,38 @@ export default async function CategoryPage({
   });
 
   if (!category) notFound();
+  const filtered = minPrice != null || maxPrice != null || minRating != null;
 
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16 pt-6">
       <h1 className="mb-4 text-2xl font-bold">{category.name}</h1>
 
-      <form className="mb-6 flex flex-wrap gap-2 text-sm" action={`/c/${categorySlug}`}>
+      {/* Two even columns on phones, one row from sm up; every control is the
+          same height. */}
+      <form className="mb-6 grid grid-cols-2 gap-2 text-sm sm:flex" action={`/c/${categorySlug}`}>
         <input
           type="number"
           name="minPrice"
           placeholder="Min R"
           defaultValue={sp.minPrice as string}
-          className="w-24 rounded-lg border border-gray-300 px-3 py-2"
+          aria-label="Minimum price in rand"
+          inputMode="numeric"
+          className="h-11 w-full rounded-lg border border-field bg-white px-3 text-sm sm:w-28"
         />
         <input
           type="number"
           name="maxPrice"
           placeholder="Max R"
           defaultValue={sp.maxPrice as string}
-          className="w-24 rounded-lg border border-gray-300 px-3 py-2"
+          aria-label="Maximum price in rand"
+          inputMode="numeric"
+          className="h-11 w-full rounded-lg border border-field bg-white px-3 text-sm sm:w-28"
         />
         <select
           name="minRating"
+          aria-label="Minimum rating"
           defaultValue={sp.minRating as string}
-          className="rounded-lg border border-gray-300 px-3 py-2"
+          className="h-11 w-full rounded-lg border border-field bg-white px-3 text-sm sm:w-auto"
         >
           <option value="">Any rating</option>
           <option value="3">3+ stars</option>
@@ -80,8 +89,9 @@ export default async function CategoryPage({
         </select>
         <select
           name="sort"
+          aria-label="Sort by"
           defaultValue={sort}
-          className="rounded-lg border border-gray-300 px-3 py-2"
+          className="h-11 w-full rounded-lg border border-field bg-white px-3 text-sm sm:w-auto"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -91,7 +101,7 @@ export default async function CategoryPage({
         </select>
         <button
           type="submit"
-          className="rounded-lg bg-brand-600 px-4 py-2 font-medium text-white"
+          className="col-span-2 h-11 rounded-full bg-brand-600 px-6 font-semibold text-white transition hover:bg-brand-700 sm:col-span-1"
         >
           Apply
         </button>
@@ -104,19 +114,20 @@ export default async function CategoryPage({
           ))}
         </div>
       ) : (
-        <p className="text-gray-500">
-          No {category.name.toLowerCase()} sellers match these filters yet.{" "}
-          {minPrice != null || maxPrice != null || minRating != null ? (
-            <Link href={`/c/${categorySlug}`} className="font-medium text-brand-600">
-              Clear filters
-            </Link>
-          ) : (
-            <Link href="/" className="font-medium text-brand-600">
-              Browse other categories
-            </Link>
-          )}
-          .
-        </p>
+        <EmptyState
+          icon={filtered ? "search" : categoryIcon(categorySlug)}
+          title={filtered ? "Nothing matches these filters" : `No ${category.name.toLowerCase()} sellers yet`}
+          body={
+            filtered
+              ? "Try a wider price range or a lower rating."
+              : "New student businesses are joining. Check back soon, or look in another category."
+          }
+          action={
+            filtered
+              ? { href: `/c/${categorySlug}`, label: "Clear filters" }
+              : { href: "/#browse", label: "Browse other categories" }
+          }
+        />
       )}
     </main>
   );

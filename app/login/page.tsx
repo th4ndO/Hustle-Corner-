@@ -20,7 +20,7 @@ type Mode = "login" | "signup";
 type Status = "idle" | "submitting" | "error" | "check-email";
 
 const inputClassName =
-  "w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-brand-500";
+  "w-full rounded-lg border border-field px-4 py-3 focus:border-brand-500";
 
 export default function LoginPage() {
   const router = useRouter();

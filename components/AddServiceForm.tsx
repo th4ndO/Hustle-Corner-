@@ -20,7 +20,7 @@ export default function AddServiceForm() {
         <label htmlFor="name" className="mb-1 block text-xs text-gray-500">
           Service name
         </label>
-        <input id="name" name="name" placeholder="e.g. Box braids" className="w-full rounded-lg border border-gray-300 px-3 py-2" />
+        <input id="name" name="name" placeholder="e.g. Box braids" className="w-full rounded-lg border border-field px-3 py-2" />
       </div>
       <div className="flex gap-2">
         <div className="w-1/2">
@@ -32,7 +32,7 @@ export default function AddServiceForm() {
             name="priceFrom"
             type="number"
             placeholder="250"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+            className="w-full rounded-lg border border-field px-3 py-2"
           />
         </div>
         <div className="w-1/2">
@@ -44,7 +44,7 @@ export default function AddServiceForm() {
             name="priceTo"
             type="number"
             placeholder="400"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+            className="w-full rounded-lg border border-field px-3 py-2"
           />
         </div>
       </div>

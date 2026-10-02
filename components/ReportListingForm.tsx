@@ -38,7 +38,7 @@ export default function ReportListingForm({ sellerId }: { sellerId: string }) {
         placeholder="Tell us what happened"
         rows={3}
         required
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-field px-3 py-2 text-sm"
       />
       {state.error && <p className="mt-2 text-sm text-red-600">{state.error}</p>}
       <div className="mt-3 flex gap-2">

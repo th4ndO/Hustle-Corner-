@@ -190,7 +190,7 @@ export default async function SellerProfilePage({
           <section className="mt-8">
             <h2 className="mb-3 text-lg font-semibold">Book an appointment</h2>
             <p className="text-sm text-gray-500">
-              <Link href={loginHref(`/s/${slug}`)} className="font-medium text-brand-600">
+              <Link href={loginHref(`/s/${slug}`)} className="text-link">
                 Log in
               </Link>{" "}
               to request an appointment.
@@ -213,7 +213,7 @@ export default async function SellerProfilePage({
           <ReviewForm sellerId={seller.id} slug={slug} />
         ) : !user && seller.reviews.length > 0 ? (
           <p className="text-sm text-gray-500">
-            <Link href={loginHref(`/s/${slug}`)} className="font-medium text-brand-600">
+            <Link href={loginHref(`/s/${slug}`)} className="text-link">
               Log in
             </Link>{" "}
             to leave a review.
@@ -241,7 +241,7 @@ export default async function SellerProfilePage({
             {!user && (
               <>
                 {" "}
-                <Link href={loginHref(`/s/${slug}`)} className="font-medium text-brand-600">
+                <Link href={loginHref(`/s/${slug}`)} className="text-link">
                   Log in
                 </Link>{" "}
                 to be the first to leave one.

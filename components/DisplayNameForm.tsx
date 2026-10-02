@@ -22,7 +22,7 @@ export default function DisplayNameForm({ currentName }: { currentName: string }
           defaultValue={currentName}
           maxLength={DISPLAY_NAME_MAX}
           autoComplete="nickname"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          className="w-full rounded-lg border border-field px-3 py-2"
         />
         <p className="mt-1.5 text-xs text-gray-500">
           Shown on your reviews and to sellers you book with.

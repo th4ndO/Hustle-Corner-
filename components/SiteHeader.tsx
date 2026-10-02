@@ -3,7 +3,7 @@ import { APP_NAME } from "@/config";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import BrandMark from "@/components/BrandMark";
-import MobileMenu from "@/components/MobileMenu";
+import MobileMenu, { type MenuIcon } from "@/components/MobileMenu";
 
 export default async function SiteHeader() {
   const supabase = await createClient();
@@ -17,17 +17,17 @@ export default async function SiteHeader() {
     isAdmin = data?.role === "admin";
   }
 
-  const menuLinks = user
+  const menuLinks: { href: string; label: string; icon: MenuIcon }[] = user
     ? [
-        { href: "/dashboard", label: "Dashboard" },
-        { href: "/bookings", label: "Bookings" },
-        ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
-        { href: "/how-it-works", label: "How it works" },
+        { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+        { href: "/bookings", label: "Bookings", icon: "bookings" },
+        ...(isAdmin ? [{ href: "/admin", label: "Admin", icon: "admin" as const }] : []),
+        { href: "/how-it-works", label: "How it works", icon: "help" },
       ]
     : [
-        { href: "/how-it-works", label: "How it works" },
-        { href: "/dashboard/become-seller", label: "List your business" },
-        { href: "/login", label: "Log in or sign up" },
+        { href: "/how-it-works", label: "How it works", icon: "help" },
+        { href: "/dashboard/become-seller", label: "List your business", icon: "add" },
+        { href: "/login", label: "Log in or sign up", icon: "login" },
       ];
 
   return (
