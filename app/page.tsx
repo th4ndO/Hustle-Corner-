@@ -60,9 +60,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {categories.length > 0 && (
-        <section id="browse" className="mb-12 scroll-mt-32">
-          <h2 className={EYEBROW}>Categories</h2>
+      {/* Always rendered: "Browse services" and the empty states link here. */}
+      <section id="browse" className="mb-12 scroll-mt-32">
+        <h2 className={EYEBROW}>Categories</h2>
+        {categories.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
             {categories.map((category) => (
               <Link
@@ -77,8 +78,10 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <p className="text-sm text-gray-600">Categories will appear here as sellers join.</p>
+        )}
+      </section>
 
       <section className="mb-12">
         {/* "Top rated" only once someone has actually been rated; until then

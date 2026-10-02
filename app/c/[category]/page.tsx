@@ -73,7 +73,7 @@ export default async function CategoryPage({
           name="maxPrice"
           placeholder="Max R"
           defaultValue={sp.maxPrice as string}
-          aria-label="Minimum price in rand"
+          aria-label="Maximum price in rand"
           inputMode="numeric"
           className="h-11 w-full rounded-lg border border-field bg-white px-3 text-sm sm:w-28"
         />

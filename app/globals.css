@@ -41,7 +41,7 @@ body {
   /* Links inside running text: underlined so they don't read as plain text
      (brand-600 navy is close to the body ink). */
   .text-link {
-    @apply font-medium text-brand-600 underline decoration-brand-100 decoration-2 underline-offset-4 transition-colors hover:decoration-brand-600;
+    @apply font-medium text-brand-600 underline decoration-gray-400 decoration-2 underline-offset-4 transition-colors hover:decoration-brand-600;
   }
 }
 
