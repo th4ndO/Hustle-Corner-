@@ -94,19 +94,20 @@ const BUSINESS_STEPS: Step[] = [
     title: "Create your account",
     body: (
       <>
-        Tap <strong>Log in</strong> in the top bar, switch to sign up, and
-        create an account with your email and a strong password.
+        Tap <strong>List your business</strong> at the bottom of this page and
+        create an account with your email and a strong password. You&apos;ll go
+        straight into setting up your listing.
       </>
     ),
   },
   {
-    title: "Open your dashboard",
+    title: "Start your listing",
     body: (
       <>
-        Once you&apos;re logged in, tap <strong>Dashboard</strong> in the top
-        bar, then <strong>List your first service</strong>. Setup takes about
-        5 minutes, and your progress is saved on your device if you need to
-        stop halfway.
+        Setup has 4 short steps and takes about 5 minutes. Your progress is
+        saved on your device if you need to stop halfway. To come back later,
+        tap <strong>Dashboard</strong> in the top bar, then{" "}
+        <strong>List your first service</strong>.
       </>
     ),
   },
@@ -126,7 +127,7 @@ const BUSINESS_STEPS: Step[] = [
   },
   {
     title: "Show off your work",
-    body: `Upload at least 1 and up to ${LIMITS.maxPortfolioPhotos} photos of your work. They're compressed automatically, so phone photos are fine.`,
+    body: `Add at least ${LIMITS.minPhotosToOnboard} photo of your work (up to ${LIMITS.maxPortfolioPhotos}). They're compressed automatically, so phone photos are fine.`,
   },
   {
     title: "Add your WhatsApp number and submit",
@@ -239,7 +240,7 @@ export default async function HowItWorksPage({
           </Link>
         ) : (
           <Link
-            href="/dashboard"
+            href="/dashboard/become-seller"
             className="inline-block rounded-full bg-brand-600 px-6 py-3 font-semibold text-white"
           >
             List your business

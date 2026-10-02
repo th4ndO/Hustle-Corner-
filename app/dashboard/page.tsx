@@ -16,6 +16,7 @@ import DeleteAccountButton from "@/components/DeleteAccountButton";
 import MicrositeForm from "@/components/MicrositeForm";
 import AvailabilityRulesForm from "@/components/AvailabilityRulesForm";
 import AppointmentsQueue from "@/components/AppointmentsQueue";
+import { loginHref } from "@/lib/safeNext";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending review",
@@ -28,7 +29,7 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect(loginHref("/dashboard"));
 
   const seller = await getSellerByOwner(user.id);
   const stats = seller ? await getSellerStats(seller.id) : null;

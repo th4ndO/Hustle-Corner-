@@ -2,10 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import {
   type AvailabilityRule,
   type OpenSlot,
-  BOOKING_WINDOW_DAYS,
-  sastToUtc,
-  sastDatePartsFor,
-  addDays,
   computeOpenSlots,
 } from "@/lib/availabilityMath";
 
@@ -42,22 +38,19 @@ export async function getOpenSlots(sellerId: string): Promise<OpenSlot[]> {
   if (rules.length === 0) return [];
 
   const now = new Date();
-  const windowStart = sastDatePartsFor(now);
-  const windowEnd = addDays(windowStart, BOOKING_WINDOW_DAYS);
-  const windowEndUtc = sastToUtc(windowEnd.year, windowEnd.month, windowEnd.day, 23, 59);
 
-  const { data: taken, error } = await supabase
-    .from("appointments")
-    .select("start_at")
-    .eq("seller_id", sellerId)
-    .in("status", ["pending", "confirmed"])
-    .gte("start_at", now.toISOString())
-    .lte("start_at", windowEndUtc.toISOString());
+  // Visitors can't read other people's appointments (RLS), so the taken
+  // start times come from get_taken_slots (0016): a narrow definer function
+  // that returns only pending/confirmed start_at values for an approved
+  // seller, over a window that covers BOOKING_WINDOW_DAYS.
+  const { data: taken, error } = await supabase.rpc("get_taken_slots", {
+    p_seller_id: sellerId,
+  });
   if (error) throw error;
 
   // Compare by millisecond value, not raw string, since Postgres's
   // timestamptz string format doesn't necessarily match Date#toISOString().
-  const takenTimesMs = (taken ?? []).map((t) => new Date(t.start_at).getTime());
+  const takenTimesMs = ((taken ?? []) as { start_at: string }[]).map((t) => new Date(t.start_at).getTime());
 
   return computeOpenSlots(rules, takenTimesMs, now);
 }

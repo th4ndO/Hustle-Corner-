@@ -1,10 +1,25 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { APP_NAME } from "@/config";
 import { passwordRequirements, isStrongPassword } from "@/lib/validation";
+import { safeNext } from "@/lib/safeNext";
+
+// Supabase Auth messages are mostly readable, but a few are jargon.
+function authMessage(message: string): string {
+  if (/rate limit/i.test(message)) return "Too many attempts right now. Please wait a few minutes and try again.";
+  if (/already registered/i.test(message)) return "That email already has an account. Log in instead.";
+  return message;
+}
+
+// Read ?next= and ?mode= from the URL on the client (no useSearchParams, so
+// the page needs no Suspense boundary).
+function readParams(): { next: string; mode: string | null } {
+  const params = new URLSearchParams(window.location.search);
+  return { next: safeNext(params.get("next")), mode: params.get("mode") };
+}
 
 type Mode = "login" | "signup";
 type Status = "idle" | "submitting" | "error" | "check-email";
@@ -20,6 +35,11 @@ export default function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Arriving via "List your business" (?mode=signup) opens straight on sign-up.
+  useEffect(() => {
+    if (readParams().mode === "signup") setMode("signup");
+  }, []);
 
   const requirements = passwordRequirements(password);
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
@@ -53,10 +73,11 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         setStatus("error");
-        setErrorMessage(error.message);
+        setErrorMessage(authMessage(error.message));
         return;
       }
-      router.push("/");
+      // Back to wherever they were headed (e.g. the listing wizard, a seller page).
+      router.push(readParams().next);
       router.refresh();
       return;
     }
@@ -68,13 +89,13 @@ export default function LoginPage() {
     });
     if (error) {
       setStatus("error");
-      setErrorMessage(error.message);
+      setErrorMessage(authMessage(error.message));
       return;
     }
     if (data.session) {
       // Email confirmation is disabled on this project — signUp already
       // returned a live session.
-      router.push("/");
+      router.push(readParams().next);
       router.refresh();
       return;
     }

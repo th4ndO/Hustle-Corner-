@@ -82,8 +82,10 @@ export default async function HomePage() {
       )}
 
       <section>
+        {/* "Top rated" only once someone has actually been rated; until then
+            the list is just the newest sellers, so say so. */}
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Top rated
+          {topSellers.some((s) => s.reviewCount > 0) ? "Top rated" : "New sellers"}
         </h2>
         {topSellers.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">

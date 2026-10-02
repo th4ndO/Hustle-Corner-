@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { compressImage } from "@/lib/imageCompression";
 import { onboardSeller } from "@/app/dashboard/become-seller/actions";
-import { LIMITS } from "@/config";
+import { APP_NAME, LIMITS } from "@/config";
 import type { CategoryTag } from "@/lib/sellers";
 
 type ServiceRow = { name: string; priceFrom: string; priceTo: string; durationMinutes: string };
@@ -361,7 +361,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
                     type="number"
                     value={s.priceFrom}
                     onChange={(e) => updateService(i, { priceFrom: e.target.value })}
-                    placeholder="250"
+                    placeholder="e.g. 250"
                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                   />
                 </div>
@@ -371,7 +371,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
                     type="number"
                     value={s.priceTo}
                     onChange={(e) => updateService(i, { priceTo: e.target.value })}
-                    placeholder="400"
+                    placeholder="e.g. 400"
                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                   />
                 </div>
@@ -382,7 +382,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
                   type="number"
                   value={s.durationMinutes}
                   onChange={(e) => updateService(i, { durationMinutes: e.target.value })}
-                  placeholder="120"
+                  placeholder="e.g. 120"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2"
                 />
               </div>
@@ -402,7 +402,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
         <div className="space-y-5">
           <h1 className="text-xl font-bold">Add photos</h1>
           <p className="text-sm text-gray-500">
-            Up to {LIMITS.maxPortfolioPhotos} photos of your work. They&apos;re compressed automatically.
+            Add at least {LIMITS.minPhotosToOnboard} photo of your work (up to {LIMITS.maxPortfolioPhotos}). They&apos;re compressed automatically, so phone photos are fine.
           </p>
           <div className="grid grid-cols-3 gap-3">
             {photos.map((p, i) => (
@@ -458,7 +458,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               className="mt-1 h-4 w-4 accent-brand-600"
             />
             I agree that my WhatsApp number and business info will be shown
-            publicly on {typeof window !== "undefined" ? window.location.hostname : "the site"}.
+            publicly on {APP_NAME}.
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>

@@ -7,6 +7,7 @@ import { normalizeSaWhatsappNumber } from "@/lib/phone";
 import { validateJpegUpload } from "@/lib/imageValidation";
 import { CAMPUS_SLUG, LIMITS } from "@/config";
 import { z } from "zod";
+import { friendlyError } from "@/lib/errors";
 
 export async function onboardSeller(formData: FormData): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -100,7 +101,7 @@ export async function onboardSeller(formData: FormData): Promise<{ error?: strin
     .select("id")
     .single();
   if (sellerError || !seller) {
-    return { error: sellerError?.message ?? "Could not create your seller profile." };
+    return { error: friendlyError(sellerError, "Could not create your seller profile. Please try again in a moment.") };
   }
 
   async function rollback() {
@@ -112,7 +113,7 @@ export async function onboardSeller(formData: FormData): Promise<{ error?: strin
     .insert(categories.map((c) => ({ seller_id: seller.id, category_id: c.id })));
   if (categoriesError) {
     await rollback();
-    return { error: categoriesError.message };
+    return { error: friendlyError(categoriesError) };
   }
 
   const { error: servicesError } = await supabase.from("services").insert(
@@ -127,7 +128,7 @@ export async function onboardSeller(formData: FormData): Promise<{ error?: strin
   );
   if (servicesError) {
     await rollback();
-    return { error: servicesError.message };
+    return { error: friendlyError(servicesError) };
   }
 
   let sortOrder = 0;
@@ -138,14 +139,14 @@ export async function onboardSeller(formData: FormData): Promise<{ error?: strin
       .upload(path, photo, { contentType: "image/jpeg" });
     if (uploadError) {
       await rollback();
-      return { error: uploadError.message };
+      return { error: friendlyError(uploadError, "Couldn't upload one of your photos. Try a different photo, or try again in a moment.") };
     }
     const { error: photoRowError } = await supabase
       .from("seller_photos")
       .insert({ seller_id: seller.id, storage_path: path, sort_order: sortOrder });
     if (photoRowError) {
       await rollback();
-      return { error: photoRowError.message };
+      return { error: friendlyError(photoRowError) };
     }
     sortOrder++;
   }
