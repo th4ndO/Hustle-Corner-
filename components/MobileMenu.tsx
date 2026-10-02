@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/auth/actions";
@@ -41,17 +41,31 @@ export default function MobileMenu({ links, loggedIn }: { links: MenuLink[]; log
   const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => setOpen(false), [pathname]);
 
-  useEffect(() => {
+  // Start the panel at the header's bottom edge (the header is two rows tall
+  // on phones, so measure rather than guess). Layout effect, so the panel
+  // never paints over the header for a frame.
+  useLayoutEffect(() => {
     if (!open) return;
-    // Start the panel at the header's bottom edge (the header is two rows
-    // tall on phones, so measure rather than guess).
     const header = rootRef.current?.closest("header");
     const measure = () => setTop(header ? header.getBoundingClientRect().bottom : 0);
     measure();
     window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    // Move focus into the menu so keyboard and screen-reader users land on it.
+    navRef.current?.querySelector<HTMLElement>("a, button")?.focus();
+    // Turning a phone sideways can cross the sm breakpoint, which hides the
+    // menu; close it so the page doesn't stay scroll-locked.
+    const wide = window.matchMedia("(min-width: 640px)");
+    const onWide = () => wide.matches && setOpen(false);
+    wide.addEventListener("change", onWide);
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setOpen(false);
@@ -62,7 +76,7 @@ export default function MobileMenu({ links, loggedIn }: { links: MenuLink[]; log
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      window.removeEventListener("resize", measure);
+      wide.removeEventListener("change", onWide);
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previousOverflow;
     };
@@ -88,6 +102,7 @@ export default function MobileMenu({ links, loggedIn }: { links: MenuLink[]; log
       </button>
       {/* Always rendered so aria-controls points at a real element. */}
       <nav
+        ref={navRef}
         id="mobile-menu"
         aria-label="Main"
         hidden={!open}
