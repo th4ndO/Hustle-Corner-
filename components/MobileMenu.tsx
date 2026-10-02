@@ -13,13 +13,17 @@ export default function MobileMenu({ links, loggedIn }: { links: MenuLink[]; log
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => setOpen(false), [pathname]);
 
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
     }
     function onPointer(e: PointerEvent) {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
@@ -38,6 +42,7 @@ export default function MobileMenu({ links, loggedIn }: { links: MenuLink[]; log
   return (
     <div ref={rootRef} className="sm:hidden">
       <button
+        ref={buttonRef}
         type="button"
         aria-expanded={open}
         aria-controls="mobile-menu"
@@ -49,32 +54,32 @@ export default function MobileMenu({ links, loggedIn }: { links: MenuLink[]; log
           {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
         </svg>
       </button>
-      {open && (
-        <nav
-          id="mobile-menu"
-          aria-label="Main"
-          className="absolute inset-x-0 top-full border-b border-brand-700 bg-brand-600 py-2 shadow-lg"
-        >
-          <ul className="mx-auto max-w-2xl">
-            {links.map((l) => (
-              <li key={l.href}>
-                <Link href={l.href} onClick={() => setOpen(false)} className={itemClass}>
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-            {loggedIn && (
-              <li className="mt-1 border-t border-brand-700 pt-1">
-                <form action={signOut}>
-                  <button type="submit" className={`${itemClass} text-white/80`}>
-                    Log out
-                  </button>
-                </form>
-              </li>
-            )}
-          </ul>
-        </nav>
-      )}
+      {/* Always rendered so aria-controls points at a real element. */}
+      <nav
+        id="mobile-menu"
+        aria-label="Main"
+        hidden={!open}
+        className="absolute inset-x-0 top-full border-b border-brand-700 bg-brand-600 py-2 shadow-lg"
+      >
+        <ul className="mx-auto max-w-2xl">
+          {links.map((l) => (
+            <li key={l.href}>
+              <Link href={l.href} onClick={() => setOpen(false)} className={itemClass}>
+                {l.label}
+              </Link>
+            </li>
+          ))}
+          {loggedIn && (
+            <li className="mt-1 border-t border-brand-700 pt-1">
+              <form action={signOut}>
+                <button type="submit" className={`${itemClass} text-white/80`}>
+                  Log out
+                </button>
+              </form>
+            </li>
+          )}
+        </ul>
+      </nav>
     </div>
   );
 }

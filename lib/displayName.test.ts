@@ -26,4 +26,7 @@ test("keeps emails, links and phone numbers out of public names", () => {
 test("rejects markup and control characters", () => {
   assert.ok("error" in checkDisplayName("<b>Lerato</b>"));
   assert.ok("error" in checkDisplayName("Lerato\u0000"));
+  assert.ok("error" in checkDisplayName("Ler\u200bato"));
+  assert.ok("error" in checkDisplayName("Lerato\u202e"));
+  assert.ok("error" in checkDisplayName("\u200b\u200b\u200b"));
 });
