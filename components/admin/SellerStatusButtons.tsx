@@ -25,7 +25,7 @@ export default function SellerStatusButtons({
           type="button"
           disabled={pending}
           onClick={() => set("approved")}
-          className="rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white disabled:opacity-50"
+          className="rounded-full bg-green-700 px-3 py-1 text-xs font-medium text-white disabled:opacity-50"
         >
           Approve
         </button>

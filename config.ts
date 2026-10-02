@@ -10,13 +10,14 @@ export const CAMPUS_NAME = "University of Pretoria - Hatfield";
 // is marked is_verified = true by the handle_new_user trigger
 // (supabase/migrations/0005), so any account can list, review and book.
 
-// Categories live in the DB (see supabase/migrations), but launch scope
-// only activates these two — everything else stays hidden until sellers
-// exist for it.
-export const ACTIVE_CATEGORY_SLUGS = ["hair", "nails"];
+// Categories live in the DB (migration 0017 seeds them); grouping and icons
+// are in lib/categoryCatalog.ts.
 
 export const LIMITS = {
   maxPortfolioPhotos: 6,
+  // Keeps each listing focused; with 30+ categories, ticking everything
+  // would make browsing useless.
+  maxCategories: 3,
   maxPhotoSizeBytes: 1 * 1024 * 1024, // ~1MB after client-side compression
   bioMaxChars: 500,
   reviewCommentMaxChars: 500,

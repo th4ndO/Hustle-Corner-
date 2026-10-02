@@ -5,7 +5,7 @@ import { getPhotoUrl } from "@/lib/sellers";
 
 function StarIcon() {
   return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-amber-500">
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-amber-600">
       <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L10 14.9l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z" />
     </svg>
   );

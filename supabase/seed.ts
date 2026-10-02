@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 
 config({ path: ".env.local" });
 import { CAMPUS_NAME, CAMPUS_SLUG } from "../config";
+import { CATEGORY_GROUPS } from "../lib/categoryCatalog";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -28,13 +29,13 @@ if (url.includes(PRODUCTION_PROJECT_REF)) {
 
 const supabase = createClient(url, serviceRoleKey);
 
-const CATEGORIES = [
-  { name: "Hair", slug: "hair", is_active: true, sort_order: 1 },
-  { name: "Nails", slug: "nails", is_active: true, sort_order: 2 },
-  { name: "Tutoring", slug: "tutoring", is_active: false, sort_order: 3 },
-  { name: "Makeup", slug: "makeup", is_active: false, sort_order: 4 },
-  { name: "Photography", slug: "photography", is_active: false, sort_order: 5 },
-];
+// Same rows as migration 0017, so a dev database matches production.
+const CATEGORIES = CATEGORY_GROUPS.flatMap((g) => g.categories).map((c, i) => ({
+  name: c.name,
+  slug: c.slug,
+  is_active: true,
+  sort_order: i + 1,
+}));
 
 const FAKE_SELLERS = [
   { name: "Thandi's Braids", category: "hair", bio: "Knotless braids, cornrows and weaves. 3 years experience.", services: [{ name: "Knotless braids (medium)", from: 450, to: 650 }, { name: "Cornrows", from: 150, to: 250 }] },

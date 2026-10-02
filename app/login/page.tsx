@@ -189,7 +189,7 @@ export default function LoginPage() {
               {requirements.map((r) => (
                 <li
                   key={r.label}
-                  className={r.met ? "text-green-600" : "text-gray-400"}
+                  className={r.met ? "text-green-700" : "text-gray-500"}
                 >
                   {r.met ? "✓" : "○"} {r.label}
                 </li>
