@@ -22,9 +22,11 @@ export default async function SiteHeader() {
         { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
         { href: "/bookings", label: "Bookings", icon: "bookings" },
         ...(isAdmin ? [{ href: "/admin", label: "Admin", icon: "admin" as const }] : []),
+        { href: "/categories", label: "All categories", icon: "tag" },
         { href: "/how-it-works", label: "How it works", icon: "help" },
       ]
     : [
+        { href: "/categories", label: "All categories", icon: "tag" },
         { href: "/how-it-works", label: "How it works", icon: "help" },
         { href: "/dashboard/become-seller", label: "List your business", icon: "add" },
         { href: "/login", label: "Log in or sign up", icon: "login" },

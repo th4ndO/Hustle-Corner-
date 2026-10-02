@@ -14,7 +14,10 @@ export const sellerOnboardingSchema = z.object({
   areaNote: z.string().trim().max(100).optional().default(""),
   instagramHandle: z.string().trim().max(50).optional().default(""),
   whatsappNumber: z.string().trim().min(1, "WhatsApp number is required"),
-  categorySlugs: z.array(z.string()).min(1, "Pick at least one category"),
+  categorySlugs: z
+    .array(z.string())
+    .min(1, "Pick at least one category")
+    .max(LIMITS.maxCategories, `Pick up to ${LIMITS.maxCategories} categories`),
   services: z.array(serviceSchema).min(LIMITS.minServicesToOnboard, "Add at least one service"),
   consent: z
     .boolean()

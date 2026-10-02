@@ -22,14 +22,14 @@ export default function ReviewForm({ sellerId, slug }: { sellerId: string; slug:
             onClick={() => setRating(n)}
             aria-label={`${n} star${n === 1 ? "" : "s"}`}
             aria-pressed={n <= rating}
-            className={`h-8 w-8 text-2xl leading-none ${n <= rating ? "text-amber-500" : "text-gray-300"}`}
+            className={`h-8 w-8 text-2xl leading-none ${n <= rating ? "text-amber-600" : "text-field"}`}
           >
             ★
           </button>
         ))}
       </div>
       <label htmlFor="comment" className="mb-1 block text-xs text-gray-500">
-        Comment <span className="text-gray-400">(optional)</span>
+        Comment <span className="text-gray-500">(optional)</span>
       </label>
       <textarea
         id="comment"

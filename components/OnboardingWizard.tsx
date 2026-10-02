@@ -5,6 +5,10 @@ import { compressImage } from "@/lib/imageCompression";
 import { onboardSeller } from "@/app/dashboard/become-seller/actions";
 import { APP_NAME, LIMITS } from "@/config";
 import type { CategoryTag } from "@/lib/sellers";
+import { categoryIcon, groupCategories } from "@/lib/categoryCatalog";
+import Icon from "@/components/Icon";
+
+const MAX_CATEGORIES = LIMITS.maxCategories;
 
 type ServiceRow = { name: string; priceFrom: string; priceTo: string; durationMinutes: string };
 type Photo = { blob: Blob; previewUrl: string };
@@ -253,7 +257,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               maxLength={BUSINESS_NAME_MAX}
               className="w-full rounded-lg border border-field px-4 py-3"
             />
-            <p className="mt-1 text-right text-xs text-gray-400">
+            <p className="mt-1 text-right text-xs text-gray-500">
               {businessName.length}/{BUSINESS_NAME_MAX}
             </p>
           </div>
@@ -271,7 +275,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
               maxLength={LIMITS.bioMaxChars}
               className="w-full rounded-lg border border-field px-4 py-3"
             />
-            <p className="mt-1 text-right text-xs text-gray-400">
+            <p className="mt-1 text-right text-xs text-gray-500">
               {bio.length}/{LIMITS.bioMaxChars}
             </p>
           </div>
@@ -292,7 +296,7 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
 
           <div>
             <label htmlFor="instagramHandle" className="mb-1.5 block text-sm font-medium text-gray-700">
-              Instagram <span className="font-normal text-gray-400">(optional)</span>
+              Instagram <span className="font-normal text-gray-500">(optional)</span>
             </label>
             <input
               id="instagramHandle"
@@ -304,30 +308,53 @@ export default function OnboardingWizard({ categories }: { categories: CategoryT
             />
           </div>
 
-          <div className="border-t border-gray-200 pt-5">
-            <h2 className="mb-1.5 text-sm font-medium text-gray-700">What do you offer?</h2>
-            <div className="space-y-2">
-              {categories.map((c) => {
-                const checked = selectedCategories.includes(c.slug);
-                return (
-                  <label
-                    key={c.slug}
-                    className={`flex items-center gap-3 rounded-lg border px-4 py-3 transition ${
-                      checked ? "border-brand-500 bg-brand-50" : "border-gray-300"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleCategory(c.slug)}
-                      className="h-4 w-4 accent-brand-600"
-                    />
-                    <span className={checked ? "font-medium text-brand-700" : ""}>{c.name}</span>
-                  </label>
-                );
-              })}
+          <fieldset className="border-t border-gray-200 pt-5">
+            <legend className="text-sm font-medium text-gray-700">What do you offer?</legend>
+            <p className="mb-3 mt-1 text-xs text-gray-500">
+              Pick up to {MAX_CATEGORIES}. Not listed? Choose <strong>Other</strong> and describe it in your bio.
+            </p>
+            <div className="space-y-4">
+              {groupCategories(categories).map((group) => (
+                <div key={group.name}>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{group.name}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {group.categories.map((c) => {
+                      const checked = selectedCategories.includes(c.slug);
+                      const full = !checked && selectedCategories.length >= MAX_CATEGORIES;
+                      return (
+                        <label
+                          key={c.slug}
+                          className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-2 text-sm transition has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-500 ${
+                            checked
+                              ? "border-brand-600 bg-brand-600 font-medium text-white"
+                              : full
+                                ? "cursor-not-allowed border-gray-200 text-gray-400"
+                                : "border-field text-gray-800 hover:border-brand-600"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            className="sr-only"
+                            checked={checked}
+                            disabled={full}
+                            onChange={() => toggleCategory(c.slug)}
+                          />
+                          <Icon name={categoryIcon(c.slug)} className="h-4 w-4" />
+                          {c.name}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+            {selectedCategories.includes("other") && (
+              <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                Say exactly what you offer in your bio. Not allowed: writing assignments or essays for others,
+                loans, alcohol, lifts for money, or reselling phones and laptops.
+              </p>
+            )}
+          </fieldset>
         </div>
       )}
 

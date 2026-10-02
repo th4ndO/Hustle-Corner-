@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getSellersByCategory, getActiveCategories, type CategorySort } from "@/lib/sellers";
 import SellerCard from "@/components/SellerCard";
 import EmptyState from "@/components/EmptyState";
-import { categoryIcon } from "@/lib/categoryIcon";
+import { categoryIcon } from "@/lib/categoryCatalog";
 import { APP_NAME, CAMPUS_NAME } from "@/config";
 
 const SORT_OPTIONS: { value: CategorySort; label: string }[] = [

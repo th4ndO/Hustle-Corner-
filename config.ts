@@ -17,6 +17,9 @@ export const ACTIVE_CATEGORY_SLUGS = ["hair", "nails"];
 
 export const LIMITS = {
   maxPortfolioPhotos: 6,
+  // Keeps each listing focused; with 30+ categories, ticking everything
+  // would make browsing useless.
+  maxCategories: 3,
   maxPhotoSizeBytes: 1 * 1024 * 1024, // ~1MB after client-side compression
   bioMaxChars: 500,
   reviewCommentMaxChars: 500,

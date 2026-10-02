@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CAMPUS_NAME } from "@/config";
 import { getActiveCategories, getTopRatedSellers } from "@/lib/sellers";
-import { categoryIcon } from "@/lib/categoryIcon";
+import { categoryIcon, popularCategories } from "@/lib/categoryCatalog";
 import SellerCard from "@/components/SellerCard";
 import EmptyState from "@/components/EmptyState";
 import Icon from "@/components/Icon";
@@ -24,13 +24,17 @@ const STEPS = [
   },
 ];
 
-const EYEBROW = "mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500";
+const EYEBROW_TEXT = "text-sm font-semibold uppercase tracking-wide text-gray-500";
+const EYEBROW = `mb-3 ${EYEBROW_TEXT}`;
 
 export default async function HomePage() {
-  const [categories, topSellers] = await Promise.all([
+  const [allCategories, topSellers] = await Promise.all([
     getActiveCategories(),
     getTopRatedSellers(6),
   ]);
+  // Popular ones on the homepage; the full grouped list is on /categories.
+  const popular = popularCategories(allCategories);
+  const categories = popular.length > 0 ? popular : allCategories.slice(0, 8);
 
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16">
@@ -62,19 +66,26 @@ export default async function HomePage() {
 
       {/* Always rendered: "Browse services" and the empty states link here. */}
       <section id="browse" className="mb-12 scroll-mt-32">
-        <h2 className={EYEBROW}>Categories</h2>
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className={EYEBROW_TEXT}>Popular categories</h2>
+          {allCategories.length > categories.length && (
+            <Link href="/categories" className="text-link text-sm">
+              All {allCategories.length} categories
+            </Link>
+          )}
+        </div>
         {categories.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
             {categories.map((category) => (
               <Link
                 key={category.slug}
                 href={`/c/${category.slug}`}
-                className="group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 font-semibold text-gray-900 transition hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-md active:scale-[0.98]"
+                className="group flex items-center gap-2.5 rounded-2xl border border-gray-200 bg-white p-3 text-sm font-semibold leading-tight text-gray-900 sm:p-4 sm:text-base transition hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-md active:scale-[0.98]"
               >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
                   <Icon name={categoryIcon(category.slug)} />
                 </span>
-                {category.name}
+                <span className="min-w-0 break-words">{category.name}</span>
               </Link>
             ))}
           </div>
