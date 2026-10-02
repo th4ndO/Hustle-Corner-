@@ -28,8 +28,8 @@ Checked 2026-09-30 against production's history (read-only).
 | `0015_fix_is_admin_recursion.sql` | *no history row* | Applied 2026-10-02 by the owner in the SQL editor (see PR #2), which doesn't add a history row. Verified live: both helpers are SECURITY DEFINER with `search_path = ''`. |
 | `0016_public_taken_slots.sql` | *no history row* | Applied with 0015, same way. Verified live: `get_taken_slots` exists. |
 | `0017_more_categories.sql` | `0017_more_categories` (applied 2026-10-02 via `apply_migration`) | Data only: 32 categories, upsert by slug. Verified: 32 active rows, history row present. |
-| `0018_seller_other_category.sql` | *not applied yet* | Adds `sellers.other_category` (what "Other" means). **Apply before deploying the app code that reads it**, or seller queries fail. Use `apply_migration` named `0018_seller_other_category`. |
-| `0019_guard_privileged_columns_on_insert.sql` | *not applied yet* | Security: BEFORE INSERT guards so non-admins can't create a seller already approved / with the micro-site / with a rating, or a profile with role admin. Apply with 0018, named `0019_guard_privileged_columns_on_insert`. |
+| `0018_seller_other_category.sql` | `0018_seller_other_category` (applied 2026-10-02 via `apply_migration`) | Adds `sellers.other_category` (what "Other" means). Verified: column and check constraint present. |
+| `0019_guard_privileged_columns_on_insert.sql` | *no history row* | Applied 2026-10-02 by the owner in the SQL editor (`apply_migration` timed out twice; nothing partial was left). Verified: both BEFORE INSERT triggers enabled, functions match the file, not executable by anon/authenticated. Security: non-admins can't create a seller already approved / with the micro-site / with a rating, or a profile with role admin. Note: inserts made in the SQL editor are also reset (no auth.uid(), so not admin). |
 
 "Covers both" above is from reading the repo files and the production step
 names; the production step bodies themselves weren't diffed.
