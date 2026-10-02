@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getSellerBySlug } from "@/lib/sellers";
 import { APP_NAME } from "@/config";
+import { brandMarkSvg } from "@/lib/brandMark";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -29,8 +30,15 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", fontSize: 32, fontWeight: 700, opacity: 0.85 }}>
-          {APP_NAME}
+        <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 32, fontWeight: 700 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`data:image/svg+xml;utf8,${encodeURIComponent(brandMarkSvg("reversed", 64))}`}
+            width={64}
+            height={64}
+            alt=""
+          />
+          <div style={{ display: "flex", opacity: 0.9 }}>{APP_NAME}</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
