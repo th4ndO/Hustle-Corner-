@@ -10,6 +10,7 @@ import SellerStatusButtons from "@/components/admin/SellerStatusButtons";
 import SellerMicrositeToggle from "@/components/admin/SellerMicrositeToggle";
 import ResolveReportButton from "@/components/admin/ResolveReportButton";
 import ReviewModerationButtons from "@/components/admin/ReviewModerationButtons";
+import MarkReviewedButton from "@/components/admin/MarkReviewedButton";
 
 const STATUS_STYLE: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700",
@@ -28,6 +29,7 @@ export default async function AdminPage() {
   ]);
 
   const pendingCount = sellers.filter((s) => s.status === "pending").length;
+  const editedCount = sellers.filter((s) => s.status === "approved" && s.editedSinceReviewAt).length;
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8 pb-16">
@@ -36,6 +38,7 @@ export default async function AdminPage() {
       <section className="mb-10">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
           Sellers {pendingCount > 0 && `(${pendingCount} pending)`}
+          {editedCount > 0 && ` (${editedCount} edited since approval)`}
         </h2>
         <ul className="space-y-2">
           {sellers.map((s) => (
@@ -54,6 +57,19 @@ export default async function AdminPage() {
                 </span>
                 {s.otherCategory && (
                   <p className="mt-0.5 text-xs text-gray-600">Other: {s.otherCategory}</p>
+                )}
+                {s.status === "approved" && s.editedSinceReviewAt && (
+                  <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-amber-800">
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 font-medium">Edited since approval</span>
+                    {new Date(s.editedSinceReviewAt).toLocaleString("en-ZA", {
+                      timeZone: "Africa/Johannesburg",
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    <MarkReviewedButton sellerId={s.id} />
+                  </p>
                 )}
               </div>
               <div className="flex items-center gap-2">
