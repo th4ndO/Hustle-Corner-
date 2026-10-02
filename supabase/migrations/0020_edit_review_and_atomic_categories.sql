@@ -22,6 +22,15 @@
 --     owner's own SQL-editor inserts.
 -- anon and authenticated (everything coming from the website or the public
 -- API) are always checked.
+--
+-- HAZARD for future changes: a write running as postgres (inside a SECURITY
+-- DEFINER function) or from another trigger skips every privileged-column
+-- guard. Today the only such paths are read-only definer functions,
+-- handle_new_user, the review rating sync and flag_seller_edit, none of
+-- which pass user-supplied values through. Any new SECURITY DEFINER RPC or
+-- trigger that writes user input to sellers, profiles or reviews must do its
+-- own checks. supabase/tests/edit_review_and_guards.sql covers the current
+-- paths.
 
 create or replace function public.is_trusted_writer()
 returns boolean
@@ -57,6 +66,8 @@ begin
   new.edited_since_review_at := old.edited_since_review_at;
   if old.status = 'approved' and (
        new.business_name is distinct from old.business_name
+    or new.slug is distinct from old.slug
+    or new.campus_id is distinct from old.campus_id
     or new.bio is distinct from old.bio
     or new.area_note is distinct from old.area_note
     or new.instagram_handle is distinct from old.instagram_handle
@@ -277,3 +288,8 @@ begin
   return new;
 end;
 $$;
+
+-- 5. Photos can't be overwritten in place. The app only uploads new files
+-- and deletes old ones; an in-place overwrite would change a live photo
+-- without touching seller_photos, so the edit flag wouldn't see it.
+drop policy if exists "seller_photos_storage_update" on storage.objects;
