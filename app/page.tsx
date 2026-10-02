@@ -45,8 +45,9 @@ export default async function HomePage() {
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-gray-600">
           The easy way to find reliable student-owned businesses at {CAMPUS_NAME}.
-          Every listing is checked before it goes live, and reviews come from
-          real students. Message them directly on WhatsApp, no app, no middleman.
+          Every listing is checked before it goes live, and you can read reviews
+          from other customers. Message them directly on WhatsApp, no app, no
+          middleman.
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
