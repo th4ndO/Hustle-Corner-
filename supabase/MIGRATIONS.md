@@ -29,6 +29,7 @@ Checked 2026-09-30 against production's history (read-only).
 | `0016_public_taken_slots.sql` | *no history row* | Applied with 0015, same way. Verified live: `get_taken_slots` exists. |
 | `0017_more_categories.sql` | `0017_more_categories` (applied 2026-10-02 via `apply_migration`) | Data only: 32 categories, upsert by slug. Verified: 32 active rows, history row present. |
 | `0018_seller_other_category.sql` | *not applied yet* | Adds `sellers.other_category` (what "Other" means). **Apply before deploying the app code that reads it**, or seller queries fail. Use `apply_migration` named `0018_seller_other_category`. |
+| `0019_guard_privileged_columns_on_insert.sql` | *not applied yet* | Security: BEFORE INSERT guards so non-admins can't create a seller already approved / with the micro-site / with a rating, or a profile with role admin. Apply with 0018, named `0019_guard_privileged_columns_on_insert`. |
 
 "Covers both" above is from reading the repo files and the production step
 names; the production step bodies themselves weren't diffed.
