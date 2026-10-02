@@ -9,6 +9,7 @@ import { normalizeSaWhatsappNumber } from "@/lib/phone";
 import { validateJpegUpload } from "@/lib/imageValidation";
 import { LIMITS } from "@/config";
 import { friendlyError } from "@/lib/errors";
+import { checkDisplayName } from "@/lib/displayName";
 
 async function requireOwnSeller() {
   const supabase = await createClient();
@@ -256,4 +257,24 @@ export async function deleteOwnAccount(): Promise<{ error?: string }> {
 
   await supabase.auth.signOut();
   redirect("/");
+}
+
+// The public name on reviews and bookings (profiles.full_name). RLS lets a
+// user update only their own row, and the 0009 trigger blocks role and
+// is_verified changes, so only the name can change here.
+export async function updateDisplayName(formData: FormData): Promise<{ error?: string; saved?: boolean }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You need to be logged in." };
+
+  const checked = checkDisplayName(String(formData.get("displayName") ?? ""));
+  if ("error" in checked) return { error: checked.error };
+
+  const { error } = await supabase.from("profiles").update({ full_name: checked.name }).eq("id", user.id);
+  if (error) return { error: friendlyError(error) };
+
+  revalidatePath("/", "layout");
+  return { saved: true };
 }

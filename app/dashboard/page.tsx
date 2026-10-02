@@ -13,6 +13,7 @@ import DeleteServiceButton from "@/components/DeleteServiceButton";
 import DeletePhotoButton from "@/components/DeletePhotoButton";
 import DashboardPhotoUploader from "@/components/DashboardPhotoUploader";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
+import DisplayNameForm from "@/components/DisplayNameForm";
 import MicrositeForm from "@/components/MicrositeForm";
 import AvailabilityRulesForm from "@/components/AvailabilityRulesForm";
 import AppointmentsQueue from "@/components/AppointmentsQueue";
@@ -30,6 +31,9 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect(loginHref("/dashboard"));
+
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+  const currentName = profile?.full_name ?? "";
 
   const seller = await getSellerByOwner(user.id);
   const stats = seller ? await getSellerStats(seller.id) : null;
@@ -49,6 +53,12 @@ export default async function DashboardPage() {
         >
           List your first service
         </Link>
+        <section className="mt-10 border-t border-gray-200 pt-6 text-left">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Your account
+          </h2>
+          <DisplayNameForm currentName={currentName} />
+        </section>
         <div className="mt-10">
           <DeleteAccountButton />
         </div>
@@ -171,6 +181,13 @@ export default async function DashboardPage() {
           ))}
         </div>
         <DashboardPhotoUploader remaining={LIMITS.maxPortfolioPhotos - seller.photos.length} />
+      </section>
+
+      <section className="mt-10 border-t border-gray-200 pt-6">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          Your account
+        </h2>
+        <DisplayNameForm currentName={currentName} />
       </section>
 
       <div className="mt-10 border-t border-gray-200 pt-6">

@@ -6,13 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { APP_NAME } from "@/config";
 import { passwordRequirements, isStrongPassword } from "@/lib/validation";
 import { safeNext } from "@/lib/safeNext";
-
-// Supabase Auth messages are mostly readable, but a few are jargon.
-function authMessage(message: string): string {
-  if (/rate limit/i.test(message)) return "Too many attempts right now. Please wait a few minutes and try again.";
-  if (/already registered/i.test(message)) return "That email already has an account. Log in instead.";
-  return message;
-}
+import { authMessage } from "@/lib/authMessage";
+import { checkDisplayName, DISPLAY_NAME_MAX } from "@/lib/displayName";
 
 // Read ?next= and ?mode= from the URL on the client (no useSearchParams, so
 // the page needs no Suspense boundary).
@@ -30,6 +25,7 @@ const inputClassName =
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -55,6 +51,13 @@ export default function LoginPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErrorMessage("");
+
+    const nameCheck = checkDisplayName(name);
+    if (mode === "signup" && "error" in nameCheck) {
+      setStatus("error");
+      setErrorMessage(nameCheck.error);
+      return;
+    }
 
     if (mode === "signup" && !canSubmitSignup) {
       setStatus("error");
@@ -85,7 +88,12 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // handle_new_user copies this into profiles.full_name, the name shown
+        // on reviews and to sellers. Without it, the email username is used.
+        data: { full_name: "name" in nameCheck ? nameCheck.name : undefined },
+      },
     });
     if (error) {
       setStatus("error");
@@ -126,6 +134,27 @@ export default function LoginPage() {
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {mode === "signup" && (
+          <div>
+            <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-gray-700">
+              Your name
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              autoComplete="nickname"
+              maxLength={DISPLAY_NAME_MAX}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Lerato M"
+              className={inputClassName}
+            />
+            <p className="mt-1.5 text-xs text-gray-500">
+              Shown on your reviews and to sellers you book with. A first name or nickname is fine.
+            </p>
+          </div>
+        )}
         <div>
           <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
             Email
