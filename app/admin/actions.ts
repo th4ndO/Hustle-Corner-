@@ -22,7 +22,11 @@ export async function setSellerStatus(
   const { supabase, ok } = await requireAdmin();
   if (!ok) return { error: "Admins only." };
 
-  const { error } = await supabase.from("sellers").update({ status }).eq("id", sellerId);
+  // Approving also counts as reviewing any edits made since the last check.
+  const { error } = await supabase
+    .from("sellers")
+    .update(status === "approved" ? { status, edited_since_review_at: null } : { status })
+    .eq("id", sellerId);
   if (error) return { error: friendlyError(error) };
 
   revalidatePath("/admin");
@@ -73,6 +77,18 @@ export async function deleteReview(reviewId: string): Promise<{ error?: string }
   if (!ok) return { error: "Admins only." };
 
   const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
+  if (error) return { error: friendlyError(error) };
+
+  revalidatePath("/admin");
+  return {};
+}
+
+// Clears "Edited since approval" once an admin has checked the listing.
+export async function markSellerReviewed(sellerId: string): Promise<{ error?: string }> {
+  const { supabase, ok } = await requireAdmin();
+  if (!ok) return { error: "Admins only." };
+
+  const { error } = await supabase.from("sellers").update({ edited_since_review_at: null }).eq("id", sellerId);
   if (error) return { error: friendlyError(error) };
 
   revalidatePath("/admin");
