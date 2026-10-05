@@ -29,8 +29,9 @@ Checked 2026-09-30 against production's history (read-only).
 | `0016_public_taken_slots.sql` | *no history row* | Applied with 0015, same way. Verified live: `get_taken_slots` exists. |
 | `0017_more_categories.sql` | `0017_more_categories` (applied 2026-10-02 via `apply_migration`) | Data only: 32 categories, upsert by slug. Verified: 32 active rows, history row present. |
 | `0018_seller_other_category.sql` | `0018_seller_other_category` (applied 2026-10-02 via `apply_migration`) | Adds `sellers.other_category` (what "Other" means). Verified: column and check constraint present. |
-| `0019_guard_privileged_columns_on_insert.sql` | *no history row* | Applied 2026-10-02 by the owner in the SQL editor (`apply_migration` timed out twice; nothing partial was left). Verified: both BEFORE INSERT triggers enabled, functions match the file, not executable by anon/authenticated. Security: non-admins can't create a seller already approved / with the micro-site / with a rating, or a profile with role admin. Note: inserts made in the SQL editor are also reset (no auth.uid(), so not admin). |
-| `0020_edit_review_and_atomic_categories.sql` | *not applied yet* | Proof: `supabase/tests/edit_review_and_guards.sql` (expect 35 of 35). Edit flag (`sellers.edited_since_review_at`), `set_seller_categories()` (one transaction), `is_trusted_writer()` used by all privileged-column guards (SQL editor / service role / admins / trigger-made writes are trusted; website users are checked), `plan` and new-profile `is_verified` guarded. **Apply before the app code that uses it, and after 0019** (re-running 0019 later would replace the 0020 version of `sellers_guard_insert`/`profiles_guard_insert`). |
+| `0019_guard_privileged_columns_on_insert.sql` | *no history row* (a 2026-10-05 re-apply also timed out) | Applied 2026-10-02 by the owner in the SQL editor (`apply_migration` timed out twice; nothing partial was left). Verified: both BEFORE INSERT triggers enabled, functions match the file, not executable by anon/authenticated. Security: non-admins can't create a seller already approved / with the micro-site / with a rating, or a profile with role admin. Note: inserts made in the SQL editor are also reset (no auth.uid(), so not admin). |
+| `0020_edit_review_and_atomic_categories.sql` | *no history row* | Applied 2026-10-05 by the owner in the SQL editor (`apply_migration` times out on function bodies); verified: all 9 function bodies identical to this file (ignoring line endings), 9 triggers enabled, storage update policy dropped. Proof `supabase/tests/edit_review_and_guards.sql` 36/36 on production. Don't re-run 0019 after it. |
+| `0021_trusted_writer_for_internal_roles.sql` | `0021_trusted_writer_execute_for_all_roles` (grant only, first attempt) **+** `0021_trusted_writer_for_internal_roles` (the file) | Hotfix 2026-10-05: after 0020, "Delete my account" failed for sellers (42501: Supabase's supabase_auth_admin couldn't run is_trusted_writer, then is_admin). Applied via the Supabase Management API migrations endpoint, which handles function bodies where `apply_migration` times out. |
 
 "Covers both" above is from reading the repo files and the production step
 names; the production step bodies themselves weren't diffed.
@@ -41,3 +42,11 @@ names; the production step bodies themselves weren't diffed.
 2. Apply it with the Supabase MCP `apply_migration` tool or the dashboard,
    using the same name, so the history gains a row that matches this table.
 3. Add the row to this table.
+
+## Applying migrations with function bodies
+
+The Supabase MCP `apply_migration` tool has timed out on every migration
+containing `$$` function bodies (0019, 0020). The Management API endpoint
+`POST /v1/projects/{ref}/database/migrations` with `{"query", "name"}`
+applies them and records the history row (used for 0021). The owner's SQL
+editor also works but records no history.

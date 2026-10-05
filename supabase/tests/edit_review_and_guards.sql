@@ -1,9 +1,9 @@
--- Proof for 0019 (insert guards) and 0020 (edit flag, set_seller_categories,
--- is_trusted_writer, finished guards). Needs migrations 0001-0020 applied.
+-- Proof for 0019 (insert guards), 0020 (edit flag, set_seller_categories,
+-- is_trusted_writer, finished guards) and 0021. Needs migrations 0001-0021.
 -- Paste the whole file into the Supabase SQL editor (runs as postgres), or
 -- run it with psql against a local copy.
 --
--- Expected: PROOF RESULT: <n> of <n> checks passed.
+-- Expected: PROOF RESULT: 37 of 37 checks passed.
 --
 -- In one transaction it seeds throwaway users and sellers (emails end in
 -- @test.invalid), runs every check as a simulated website user
@@ -208,6 +208,30 @@ begin
   insert into _results (test, expected, actual, pass) values ('is_trusted_writer is not SECURITY DEFINER', 'true', b::text, b);
   select not exists (select 1 from pg_policies where schemaname = 'storage' and policyname = 'seller_photos_storage_update') into b;
   insert into _results (test, expected, actual, pass) values ('photos cannot be overwritten in storage', 'true', b::text, b);
+  -- 0021: Supabase's own roles (e.g. supabase_auth_admin deleting an
+  -- account) run these triggers, so the helper must be executable by
+  -- everyone and must not call is_admin() for them.
+  select has_function_privilege('public', 'public.is_trusted_writer()', 'execute')
+     and (select l.lanname = 'plpgsql' from pg_proc p join pg_language l on l.oid = p.prolang
+           where p.oid = 'public.is_trusted_writer()'::regprocedure)
+    into b;
+  insert into _results (test, expected, actual, pass) values ('internal roles can run the guard helper', 'true', b::text, b);
+  -- Behaviour, not just the grant: a role like supabase_auth_admin (not
+  -- anon/authenticated, no EXECUTE on is_admin) must get "trusted" back
+  -- without an error. The role is created inside this transaction, so it
+  -- disappears with the rollback.
+  create role proof_internal_role nologin;
+  grant usage on schema public to proof_internal_role;
+  -- On Supabase, postgres is not a superuser: it needs membership to switch.
+  execute format('grant proof_internal_role to %I', current_user);
+  set local role proof_internal_role;
+  begin
+    select public.is_trusted_writer() into b;
+    v := coalesce(b::text, 'null');
+  exception when others then v := sqlstate;
+  end;
+  reset role;
+  insert into _results (test, expected, actual, pass) values ('internal role gets trusted without is_admin', 'true', v, v = 'true');
   select count(*) into n from pg_trigger
    where tgname in ('sellers_guard_insert_trigger', 'profiles_guard_insert_trigger', 'sellers_guard_update_trigger',
                     'services_flag_seller_edit', 'seller_photos_flag_seller_edit', 'seller_categories_flag_seller_edit',
